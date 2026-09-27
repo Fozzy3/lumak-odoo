@@ -120,17 +120,21 @@ Un documento **no** se puede subsanar si da puntaje, si sirve para comparar ofer
 - **Retención en la fuente y retención de ICA: 0%.** Lumak está en el SIMPLE (ET art. 911): hay que mostrar el RUT con la responsabilidad 47.
 - **Retención de IVA:** la entidad retiene el 15% del IVA. Se recupera en la declaración de IVA.
 - **Estampillas: se pierden.** Bogotá cobra ~4,1% y Cundinamarca ~4,5%. Las entidades nacionales no cobran estampillas territoriales.
-- **Regla de precio:** base sin IVA ≥ costo ÷ (1 − 0,073 − estampillas). El 0,073 es el SIMPLE.
+- **Regla de precio:** base sin IVA ≥ costo ÷ (1 − 0,059 − estampillas). El 0,059 es el SIMPLE de servicios profesionales hasta 6.000 UVT de ingresos al año ($314 M en 2026); por encima sube a 7,3 % y luego a 12 %, sobre todo el ingreso del año (`investigacion/impuestos-nomina-obligaciones.md`, sección 2). Esta nota decía 0,073 hasta el 27 sep 2026.
 - Las adiciones al contrato no pueden pasar del 50% del valor inicial, y cada adición obliga a ampliar la póliza.
 
 ## 5. Cómo queda en Odoo
 
-- **CRM, equipo "Licitaciones SECOP":** un proceso = una oportunidad.
-  - Etapas: Detectado → Evaluando → Preparando oferta → Oferta presentada → En evaluación → Adjudicado.
-  - Motivos de pérdida propios.
-  - Propiedades: número de proceso, enlace, modalidad, cierre, MiPyME, etc.
-- **Planes de actividades:** "Oferta mínima cuantía" agenda los documentos contando hacia atrás desde la fecha de cierre, y "Después del cierre" agenda evaluación y subsanación.
-- **Proyectos:** una plantilla de "Contrato SECOP" para ejecutar lo ganado, de la legalización al certificado de experiencia.
+El recorrido completo, de la importación a la experiencia certificada, está en `plan-operacion-lumak.md`, sección 3. En corto:
+
+- **App Lumak:** el tablero de toda la empresa (cierres, contratos, cartera, kit y fechas legales), el kit de documentos, la experiencia, las fechas de la empresa y los datos del representante legal.
+- **CRM → Licitaciones:** procesos SECOP (tarjetas, lista y calendario de cierres) e «Importar desde SECOP». Un proceso = una oportunidad del equipo «Licitaciones SECOP», con etapas Detectado → Evaluando → Preparando oferta → Oferta presentada → En evaluación → Adjudicado.
+- **Solo, al cambiar de etapa:**
+  - «Preparando oferta» crea la cotización (la oferta económica) y agenda el plan de 8 pasos contados desde el cierre.
+  - «Oferta presentada» agenda el plan «Después del cierre».
+  - «Adjudicado» confirma la cotización y abre el proyecto del contrato desde la plantilla, con su hito de pago.
+- **Botón «Preparar documentos de la oferta»:** carta, oferta económica, aportes, anticorrupción, inhabilidades y experiencia, más el kit vigente al cierre, en un ZIP.
+- **Calendario:** el cierre y el límite de observaciones de cada proceso abierto, con recordatorio.
 
 ## Fuentes
 
