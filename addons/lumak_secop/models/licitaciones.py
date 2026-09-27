@@ -239,7 +239,9 @@ class CrmLead(models.Model):
         extra = {"semana": [("date_deadline", ">=", fields.Date.to_string(hoy)),
                             ("date_deadline", "<=", fields.Date.to_string(hoy + timedelta(days=7)))]}.get(filtro, [])
         action = self.env["ir.actions.act_window"]._for_xml_id("crm.crm_lead_action_pipeline")
-        action.pop("view_id", None)
+        # Sin esto hereda el título («Clientes privados») y la ruta /odoo/crm, que al recargar abre el flujo privado
+        for key in ("id", "xml_id", "path", "display_name", "view_id"):
+            action.pop(key, None)
         action.update({
             "name": _("Cierran esta semana") if filtro == "semana" else _("Licitaciones SECOP"),
             "domain": [("type", "=", "opportunity"), ("team_id", "=", team.id)] + extra,

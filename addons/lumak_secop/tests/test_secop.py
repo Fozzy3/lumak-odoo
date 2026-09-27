@@ -157,6 +157,10 @@ class TestSecop(TransactionCase):
         self.assertIn(("team_id", "=", self.team.id), action["domain"])
         self.assertEqual(action["context"]["default_team_id"], self.team.id)
         self.assertNotIn("search_default_assigned_to_me", action["context"])
+        # copia la acción genérica del CRM: sin esto hereda su título («Clientes privados») y su ruta /odoo/crm al recargar
+        self.assertEqual(action.get("display_name", action["name"]), "Licitaciones SECOP")
+        self.assertNotIn("path", action)
+        self.assertNotIn("id", action)
         views = dict((mode, view) for view, mode in action["views"])
         self.assertEqual(views["kanban"], self.env.ref("lumak_secop.crm_lead_kanban_secop").id)
         self.assertEqual(views["list"], self.env.ref("lumak_secop.crm_lead_list_secop").id)
