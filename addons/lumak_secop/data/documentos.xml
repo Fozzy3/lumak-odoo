@@ -1,0 +1,86 @@
+<odoo>
+    <!-- Datos fijos de la empresa (lo personal, como la cédula, se llena en Ajustes → Compañía) -->
+    <record id="base.main_company" model="res.company">
+        <field name="lumak_fecha_constitucion">2026-09-26</field>
+    </record>
+
+    <!-- Kit de la empresa: vigencias y enlaces según docs/licitaciones-secop.md. noupdate: aquí se suben los archivos -->
+    <data noupdate="1">
+        <record id="doc_camara" model="lumak.documento">
+            <field name="name">Certificado de existencia y representación legal</field><field name="sequence">1</field>
+            <field name="emisor">Cámara de Comercio de Bogotá ($12.100)</field>
+            <field name="url">https://www.ccb.org.co/</field><field name="vigencia_dias">30</field>
+            <field name="nota">Expedido dentro de los 30 días anteriores al cierre (60 para pedir limitación MiPyME).</field>
+        </record>
+        <record id="doc_rut" model="lumak.documento">
+            <field name="name">RUT con responsabilidad 47</field><field name="sequence">2</field>
+            <field name="emisor">DIAN</field><field name="url">https://muisca.dian.gov.co</field><field name="vigencia_dias">0</field>
+            <field name="nota">La 47 (SIMPLE) evita que la entidad retenga renta e ICA.</field>
+        </record>
+        <record id="doc_cedula" model="lumak.documento">
+            <field name="name">Cédula del representante legal</field><field name="sequence">3</field>
+            <field name="emisor">Registraduría</field><field name="vigencia_dias">0</field>
+        </record>
+        <record id="doc_procuraduria_empresa" model="lumak.documento">
+            <field name="name">Antecedentes disciplinarios de la empresa</field><field name="sequence">4</field>
+            <field name="emisor">Procuraduría (gratis)</field>
+            <field name="url">https://www.procuraduria.gov.co/Pages/Generacion-de-antecedentes.aspx</field><field name="vigencia_dias">30</field>
+            <field name="nota">Si el NIT no aparece, hay que registrarlo en persona: probarlo antes de la primera oferta.</field>
+        </record>
+        <record id="doc_procuraduria_rl" model="lumak.documento">
+            <field name="name">Antecedentes disciplinarios del representante legal</field><field name="sequence">5</field>
+            <field name="emisor">Procuraduría (gratis)</field>
+            <field name="url">https://www.procuraduria.gov.co/Pages/Generacion-de-antecedentes.aspx</field><field name="vigencia_dias">30</field>
+        </record>
+        <record id="doc_contraloria_empresa" model="lumak.documento">
+            <field name="name">Antecedentes fiscales de la empresa</field><field name="sequence">6</field>
+            <field name="emisor">Contraloría (gratis)</field>
+            <field name="url">https://www.contraloria.gov.co/web/guest/persona-juridica</field><field name="vigencia_dias">30</field>
+        </record>
+        <record id="doc_contraloria_rl" model="lumak.documento">
+            <field name="name">Antecedentes fiscales del representante legal</field><field name="sequence">7</field>
+            <field name="emisor">Contraloría (gratis)</field>
+            <field name="url">https://www.contraloria.gov.co/web/guest/persona-natural</field><field name="vigencia_dias">30</field>
+        </record>
+        <record id="doc_policia" model="lumak.documento">
+            <field name="name">Antecedentes judiciales del representante legal</field><field name="sequence">8</field>
+            <field name="emisor">Policía (gratis)</field>
+            <field name="url">https://antecedentes.policia.gov.co:7005/WebJudicial/</field><field name="vigencia_dias">30</field>
+        </record>
+        <record id="doc_rnmc" model="lumak.documento">
+            <field name="name">Medidas correctivas (RNMC) del representante legal</field><field name="sequence">9</field>
+            <field name="emisor">Policía (gratis)</field>
+            <field name="url">https://srvcnpc.policia.gov.co/PSC/frm_cnp_consulta.aspx</field><field name="vigencia_dias">30</field>
+        </record>
+        <record id="doc_redam" model="lumak.documento">
+            <field name="name">REDAM del representante legal</field><field name="sequence">10</field>
+            <field name="emisor">MinTIC, con Carpeta Ciudadana (gratis)</field>
+            <field name="url">https://carpetaciudadana.and.gov.co/</field><field name="vigencia_dias">30</field>
+            <field name="nota">Pide autenticación digital en Carpeta Ciudadana.</field>
+        </record>
+        <record id="doc_bancaria" model="lumak.documento">
+            <field name="name">Certificación bancaria</field><field name="sequence">11</field>
+            <field name="emisor">Banco Caja Social (gratis en línea)</field><field name="vigencia_dias">30</field>
+        </record>
+        <record id="doc_hoja_vida_pj" model="lumak.documento">
+            <field name="name">Formato único de hoja de vida de persona jurídica</field><field name="sequence">20</field>
+            <field name="emisor">Función Pública (formato; lo llena y firma el representante legal)</field>
+            <field name="url">https://www1.funcionpublica.gov.co/descarga-de-formatos</field><field name="vigencia_dias">0</field>
+            <field name="en_oferta" eval="False"/>
+            <field name="nota">Se pide al legalizar el contrato y en contratación directa.</field>
+        </record>
+        <record id="doc_estados_financieros" model="lumak.documento">
+            <field name="name">Estados financieros (de apertura el primer año)</field><field name="sequence">21</field>
+            <field name="emisor">Representante legal y contador</field><field name="vigencia_dias">0</field>
+            <field name="en_oferta" eval="False"/>
+            <field name="nota">Para el registro de proveedor en SECOP II, el RUP y los bancos.</field>
+        </record>
+        <record id="doc_rup" model="lumak.documento">
+            <field name="name">Registro Único de Proponentes (RUP)</field><field name="sequence">22</field>
+            <field name="emisor">Cámara de Comercio ($831.000 al año)</field>
+            <field name="url">https://www.vue.gov.co/tramites-y-consultas/registro-unico-proponentes-rup</field><field name="vigencia_dias">0</field>
+            <field name="en_oferta" eval="False"/>
+            <field name="nota">Plan: inscribirlo en feb–mar 2027 para ir por menor cuantía desde sep 2027.</field>
+        </record>
+    </data>
+</odoo>

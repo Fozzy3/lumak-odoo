@@ -1,0 +1,73 @@
+<odoo>
+    <!-- Hitos de proyecto: son la forma de facturar los contratos por entregas -->
+    <record id="base.group_user" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('project.group_project_milestone'))]"/>
+    </record>
+
+    <!-- Catálogo de servicios. noupdate: precios e impuestos los ajusta Lumak en Odoo, no el código -->
+    <data noupdate="1">
+        <record id="product_contrato_secop" model="product.product">
+            <field name="name">Contrato con entidad pública (SECOP)</field>
+            <field name="default_code">SECOP</field>
+            <field name="type">service</field>
+            <field name="sale_ok" eval="True"/>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0</field>
+            <!-- Al confirmar la cotización se abre el proyecto desde la plantilla y se factura por hitos -->
+            <field name="service_tracking">project_only</field>
+            <field name="project_template_id" ref="project_contrato_secop"/>
+            <field name="invoice_policy">delivery</field>
+            <field name="service_type">milestones</field>
+            <field name="description_sale">El objeto, las obligaciones y el plazo son los de la invitación del proceso.</field>
+        </record>
+        <record id="product_proyecto_privado" model="product.product">
+            <field name="name">Proyecto de software a la medida</field>
+            <field name="default_code">PROY</field>
+            <field name="type">service</field>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0</field>
+            <field name="service_tracking">project_only</field>
+            <field name="project_template_id" ref="project_proyecto_privado"/>
+            <field name="invoice_policy">delivery</field>
+            <field name="service_type">milestones</field>
+        </record>
+        <record id="product_soporte_mes" model="product.product">
+            <field name="name">Soporte y mantenimiento (mes)</field>
+            <field name="default_code">SOP</field>
+            <field name="type">service</field>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0</field>
+        </record>
+        <record id="product_saas_mes" model="product.product">
+            <field name="name">Suscripción SaaS (mes)</field>
+            <field name="default_code">SAAS</field>
+            <field name="type">service</field>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0</field>
+        </record>
+        <record id="product_nube_mes" model="product.product">
+            <field name="name">Hosting y servicios en la nube (mes)</field>
+            <field name="default_code">NUBE</field>
+            <field name="type">service</field>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0</field>
+        </record>
+        <record id="product_hora_desarrollo" model="product.product">
+            <field name="name">Hora de desarrollo</field>
+            <field name="default_code">HORA</field>
+            <field name="type">service</field>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0</field>
+        </record>
+        <record id="product_capacitacion" model="product.product">
+            <field name="name">Capacitación (hora)</field>
+            <field name="default_code">CAP</field>
+            <field name="type">service</field>
+            <field name="purchase_ok" eval="False"/>
+            <field name="list_price">0</field>
+        </record>
+    </data>
+
+    <!-- Corre en cada actualización: impuestos de una SAS del SIMPLE (IVA excluido en nube, sin retenciones de renta ni ICA) -->
+    <function model="product.template" name="_lumak_impuestos_colombia"/>
+</odoo>

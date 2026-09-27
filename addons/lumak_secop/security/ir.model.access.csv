@@ -1,2 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_lumak_secop_import,lumak.secop.import,model_lumak_secop_import,sales_team.group_sale_salesman,1,1,1,1
+access_lumak_documento,lumak.documento,model_lumak_documento,sales_team.group_sale_salesman,1,1,1,1
+access_lumak_experiencia,lumak.experiencia,model_lumak_experiencia,sales_team.group_sale_salesman,1,1,1,1
+access_lumak_experiencia_project,lumak.experiencia project,model_lumak_experiencia,project.group_project_user,1,1,1,0

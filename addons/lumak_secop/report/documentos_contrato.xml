@@ -1,0 +1,271 @@
+<odoo>
+    <!-- Formato de experiencia (va en el paquete de la oferta cuando hay experiencia registrada) -->
+    <template id="report_experiencia">
+        <t>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="d" t-value="o._secop_docs()"/>
+                <t t-set="c" t-value="d['company']"/>
+                <t t-call="web.basic_layout">
+                    <div class="page" style="font-size: 9.5pt;">
+                        <t t-call="lumak_secop.secop_membrete"/>
+                        <h5 class="text-center">FORMATO DE EXPERIENCIA – RELACIÓN DE CONTRATOS</h5>
+                        <p>Proceso n.º <t t-out="o.secop_numero"/> – <t t-out="o.partner_id.name"/><br/>
+                            Proponente: <t t-out="c.name"/> – NIT <t t-out="c.vat"/></p>
+                        <table class="table table-sm table-bordered" style="font-size: 8.5pt;">
+                            <thead>
+                                <tr><th>N.º</th><th style="width: 14%;">Contratante</th><th>Tipo</th><th style="width: 10%;">Contrato</th>
+                                    <th style="width: 34%;">Objeto</th><th>UNSPSC</th><th style="width: 8%;">Inicio</th>
+                                    <th style="width: 8%;">Terminación</th><th class="text-end">Valor (COP)</th><th style="width: 12%;">Verificación</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o._secop_experiencias()" t-as="e">
+                                    <td t-out="e_index + 1"/>
+                                    <td t-out="e.contratante_id.name"/>
+                                    <td><t t-out="'Pública' if e.publico else 'Privada'"/><t t-if="e.de_socio"> (socio)</t></td>
+                                    <td t-out="e.contrato_numero or ''"/>
+                                    <td t-out="e.objeto"/>
+                                    <td t-out="e.unspsc or ''"/>
+                                    <td t-out="e.fecha_inicio or ''"/>
+                                    <td t-out="e.fecha_fin or ''"/>
+                                    <td class="text-end" t-out="'{:,.0f}'.format(e.valor).replace(',', '.')"/>
+                                    <td t-out="e.contacto or ''"/>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p>Forma de ejecución: individual, 100 %. Los contratos marcados «(socio)» son experiencia del accionista, que la
+                            sociedad puede acreditar durante sus tres primeros años (Decreto 1082 de 2015, art. 2.2.1.1.1.5.2).</p>
+                        <p>Declaro bajo la gravedad del juramento que la información anterior es veraz y puede ser verificada por la Entidad.</p>
+                        <t t-call="lumak_secop.secop_firma"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Informe de actividades para cada pago -->
+    <template id="report_informe_actividades">
+        <t>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="d" t-value="o._secop_docs()"/>
+                <t t-set="c" t-value="d['company']"/>
+                <t t-call="web.basic_layout">
+                    <div class="page" style="font-size: 10.5pt;">
+                        <t t-call="lumak_secop.secop_membrete"/>
+                        <h5 class="text-center">INFORME DE ACTIVIDADES</h5>
+                        <table class="table table-sm" style="font-size: 10pt;">
+                            <tr><td style="width: 28%;">Contrato</td><td>n.º <t t-out="o.contrato_numero or '—'"/> – <t t-out="o.partner_id.name"/></td></tr>
+                            <tr><td>Contratista</td><td><t t-out="c.name"/> – NIT <t t-out="c.vat"/></td></tr>
+                            <tr><td>Objeto</td><td t-out="o.contrato_objeto"/></tr>
+                            <tr><td>Supervisor</td><td t-out="o.supervisor or '—'"/></tr>
+                            <tr><td>Periodo reportado</td><td>del <t t-out="d['inicio']"/> al <t t-out="d['fecha']"/></td></tr>
+                        </table>
+
+                        <h6>1. Actividades ejecutadas</h6>
+                        <ul t-if="d['hechas']"><li t-foreach="d['hechas']" t-as="t" t-out="t.name"/></ul>
+                        <p t-else="">Sin actividades cerradas en el periodo.</p>
+                        <t t-if="d['en_curso']">
+                            <h6>2. Actividades en curso</h6>
+                            <ul><li t-foreach="d['en_curso']" t-as="t" t-out="t.name"/></ul>
+                        </t>
+
+                        <h6>3. Entregables e hitos de pago</h6>
+                        <table class="table table-sm table-bordered">
+                            <thead><tr><th>Hito</th><th>Fecha prevista</th><th>Estado</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="o.milestone_ids" t-as="m">
+                                    <td t-out="m.name"/>
+                                    <td t-out="m.deadline or '—'"/>
+                                    <td><t t-out="'Cumplido el %s' % m.reached_date if m.is_reached else 'Pendiente'"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h6>4. Ejecución financiera</h6>
+                        <table class="table table-sm table-bordered">
+                            <thead><tr><th class="text-end">Valor del contrato</th><th class="text-end">Facturado</th><th class="text-end">Saldo</th></tr></thead>
+                            <tbody><tr>
+                                <td class="text-end"><span t-out="o.contrato_valor" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                <td class="text-end"><span t-out="d['facturado']" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                                <td class="text-end"><span t-out="d['saldo']" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/></td>
+                            </tr></tbody>
+                        </table>
+
+                        <h6>5. Obligaciones generales</h6>
+                        <p>Aportes al Sistema de Seguridad Social y parafiscales: se adjunta la certificación del artículo 50 de la Ley 789 de
+                            2002 para el periodo. Confidencialidad y protección de datos personales: cumplidas.</p>
+
+                        <p><t t-out="c.city"/>, <t t-out="d['fecha']"/></p>
+                        <div class="row" style="margin-top: 48px;">
+                            <div class="col-6"><t t-call="lumak_secop.secop_firma"/></div>
+                            <div class="col-6" style="margin-top: 56px;">______________________________<br/>
+                                Vo. Bo. <t t-out="o.supervisor or 'Supervisor del contrato'"/></div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Certificación de aportes para cada pago (Ley 1150 art. 23: se acredita en cada pago) -->
+    <template id="report_aportes_pago">
+        <t>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="d" t-value="o._secop_docs()"/>
+                <t t-set="c" t-value="d['company']"/>
+                <t t-call="web.basic_layout">
+                    <div class="page" style="font-size: 11pt;">
+                        <t t-call="lumak_secop.secop_membrete"/>
+                        <h5 class="text-center">CERTIFICACIÓN DE PAGO DE APORTES AL SISTEMA DE SEGURIDAD SOCIAL INTEGRAL Y APORTES PARAFISCALES</h5>
+                        <p class="text-center" style="font-size: 9.5pt;">Artículo 50 de la Ley 789 de 2002 y parágrafo 1 del artículo 41 de la Ley 80 de 1993</p>
+                        <p>Contrato n.º <t t-out="o.contrato_numero or '—'"/> – <t t-out="o.partner_id.name"/></p>
+                        <p>Yo, <t t-out="c.lumak_representante"/>, identificado con cédula de ciudadanía n.º <t t-out="c.lumak_representante_cc"/>,
+                            en mi calidad de representante legal de <t t-out="c.name"/>, NIT <t t-out="c.vat"/>, sociedad que no está obligada a
+                            tener revisor fiscal y no lo tiene, certifico bajo la gravedad del juramento que:</p>
+                        <p t-if="not c.lumak_tiene_empleados">Desde <t t-if="d['desde_constitucion']">su constitución, el </t><t t-out="d['aportes_desde']"/>,
+                            y hasta la fecha de esta certificación, que cubre el periodo de ejecución del contrato, <t t-out="c.name"/> no ha tenido
+                            trabajadores vinculados mediante contrato de trabajo ni personal a cargo, por lo que no ha estado obligada a efectuar
+                            aportes al Sistema de Seguridad Social Integral ni aportes parafiscales por ese concepto.</p>
+                        <p t-else="">La sociedad ha pagado los aportes de sus empleados a los sistemas de salud, riesgos laborales y pensiones, y a las
+                            Cajas de Compensación Familiar, ICBF y SENA, durante el periodo de ejecución del contrato. Se adjuntan las planillas PILA
+                            pagadas del periodo.</p>
+                        <p>Se expide en <t t-out="c.city"/>, el <t t-out="d['fecha']"/>.</p>
+                        <t t-call="lumak_secop.secop_firma"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Derecho de petición para pedir la certificación de experiencia al terminar -->
+    <template id="report_derecho_peticion">
+        <t>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="d" t-value="o._secop_docs()"/>
+                <t t-set="c" t-value="d['company']"/>
+                <t t-call="web.basic_layout">
+                    <div class="page" style="font-size: 11pt;">
+                        <t t-call="lumak_secop.secop_membrete"/>
+                        <p><t t-out="c.city"/>, <t t-out="d['fecha']"/></p>
+                        <p>Señores<br/><strong t-out="o.partner_id.name"/><br/>Dependencia de contratación / supervisor del contrato</p>
+                        <p><strong>Asunto: Derecho de petición (artículo 23 de la Constitución; Ley 1755 de 2015) – Solicitud de certificación
+                            de experiencia del contrato n.º <t t-out="o.contrato_numero or '—'"/></strong></p>
+                        <p><t t-out="c.lumak_representante"/>, C.C. <t t-out="c.lumak_representante_cc"/>, representante legal de <t t-out="c.name"/>,
+                            NIT <t t-out="c.vat"/>, con dirección <t t-out="c.street"/>, <t t-out="c.city"/>, y correo electrónico <t t-out="c.email"/>,
+                            en ejercicio del derecho de petición solicito respetuosamente que se expida certificación del contrato
+                            n.º <t t-out="o.contrato_numero or '—'"/>, cuyo objeto es «<t t-out="o.contrato_objeto"/>», que contenga:</p>
+                        <ol>
+                            <li>Número y fecha de suscripción del contrato y modalidad de selección.</li>
+                            <li>Objeto y alcance o actividades ejecutadas.</li>
+                            <li>Fechas de inicio, terminación y, si aplica, liquidación.</li>
+                            <li>Valor inicial, adiciones y valor final ejecutado.</li>
+                            <li>Forma de ejecución (individual) y porcentaje de participación (100 %).</li>
+                            <li>Constancia de cumplimiento y recibo a satisfacción, y si hubo multas, sanciones o incumplimientos.</li>
+                            <li>Códigos del Clasificador de Bienes y Servicios (UNSPSC) del contrato.</li>
+                            <li>Nombre, cargo y datos de contacto de quien certifica.</li>
+                        </ol>
+                        <p>La certificación es necesaria para acreditar experiencia ante entidades estatales y para inscribirla en el Registro
+                            Único de Proponentes. Solicito que la respuesta se envíe al correo <t t-out="c.email"/>, dentro del término de diez (10)
+                            días previsto en el numeral 1 del artículo 14 de la Ley 1437 de 2011, sustituido por la Ley 1755 de 2015.</p>
+                        <p>Atentamente,</p>
+                        <t t-call="lumak_secop.secop_firma"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Solicitud (o corrección) de la certificación de un contrato ya registrado como experiencia.
+         La experiencia del socio la pide él como contratista, sin membrete de Lumak. -->
+    <template id="report_solicitud_certificacion">
+        <t t-foreach="docs" t-as="o">
+            <t t-set="d" t-value="o._secop_docs()"/>
+            <t t-set="c" t-value="d['company']"/>
+            <t t-call="web.basic_layout">
+                <div class="page" style="font-size: 11pt;">
+                    <t t-if="not o.de_socio" t-call="lumak_secop.secop_membrete"/>
+                    <p><t t-out="c.city"/>, <t t-out="d['fecha']"/></p>
+                    <p>Señores<br/><strong t-out="o.contratante_id.name"/><br/>Dependencia de contratación</p>
+                    <p><strong>Asunto: Derecho de petición (artículo 23 de la Constitución; Ley 1755 de 2015) –
+                        <t t-out="'Corrección de la certificación' if o.correccion else 'Solicitud de certificación'"/>
+                        del contrato n.º <t t-out="o.contrato_numero or '—'"/></strong></p>
+                    <p t-if="o.de_socio"><t t-out="c.lumak_representante"/>, identificado con C.C. <t t-out="c.lumak_representante_cc"/>,
+                        con dirección <t t-out="c.street"/>, <t t-out="c.city"/>, y correo electrónico <t t-out="c.email"/>, en calidad de
+                        contratista del contrato n.º <t t-out="o.contrato_numero or '—'"/>, cuyo objeto es «<t t-out="o.objeto"/>», en ejercicio
+                        del derecho de petición:</p>
+                    <p t-else=""><t t-out="c.lumak_representante"/>, C.C. <t t-out="c.lumak_representante_cc"/>, representante legal de
+                        <t t-out="c.name"/>, NIT <t t-out="c.vat"/>, con dirección <t t-out="c.street"/>, <t t-out="c.city"/>, y correo
+                        electrónico <t t-out="c.email"/>, en ejercicio del derecho de petición, respecto del contrato
+                        n.º <t t-out="o.contrato_numero or '—'"/>, cuyo objeto es «<t t-out="o.objeto"/>»:</p>
+                    <p t-if="o.correccion">La certificación expedida para este contrato tiene un error en <t t-out="o.correccion"/>.
+                        Solicito respetuosamente que se expida de nuevo, corregida, y que contenga:</p>
+                    <p t-else="">Solicito respetuosamente que se expida certificación del contrato, que contenga:</p>
+                    <ol>
+                        <li>Número y fecha de suscripción del contrato y modalidad de selección.</li>
+                        <li>Objeto y alcance o actividades ejecutadas.</li>
+                        <li>Fechas de inicio, terminación y, si aplica, liquidación.</li>
+                        <li>Valor inicial, adiciones y valor final ejecutado.</li>
+                        <li>Nombre y número de identificación completos del contratista.</li>
+                        <li>Constancia de cumplimiento y recibo a satisfacción, y si hubo multas, sanciones o incumplimientos.</li>
+                        <li>Códigos del Clasificador de Bienes y Servicios (UNSPSC) del contrato.</li>
+                        <li>Nombre, cargo y datos de contacto de quien certifica.</li>
+                    </ol>
+                    <p>La certificación es necesaria para acreditar experiencia ante entidades estatales y para inscribirla en el Registro
+                        Único de Proponentes. Solicito que la respuesta se envíe al correo <t t-out="c.email"/>, dentro del término de diez (10)
+                        días previsto en el numeral 1 del artículo 14 de la Ley 1437 de 2011, sustituido por la Ley 1755 de 2015.</p>
+                    <p>Atentamente,</p>
+                    <div t-if="o.de_socio" style="margin-top: 56px;">
+                        <p>______________________________<br/><strong t-out="c.lumak_representante"/><br/>
+                            C.C. <t t-out="c.lumak_representante_cc"/></p>
+                    </div>
+                    <t t-else="" t-call="lumak_secop.secop_firma"/>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_solicitud_certificacion" model="ir.actions.report">
+        <field name="name">Solicitud de certificación (derecho de petición)</field>
+        <field name="model">lumak.experiencia</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lumak_secop.report_solicitud_certificacion</field>
+        <field name="print_report_name">'Solicitud de certificación - %s' % (object.contrato_numero or object.contratante_id.name)</field>
+        <field name="paperformat_id" ref="paperformat_carta"/>
+        <field name="binding_model_id" ref="model_lumak_experiencia"/>
+    </record>
+
+    <record id="action_report_experiencia" model="ir.actions.report">
+        <field name="name">Formato de experiencia</field>
+        <field name="model">crm.lead</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lumak_secop.report_experiencia</field>
+        <field name="paperformat_id" ref="paperformat_carta"/>
+    </record>
+    <!-- Estos sí van en el menú Imprimir del proyecto -->
+    <record id="action_report_informe_actividades" model="ir.actions.report">
+        <field name="name">Informe de actividades</field>
+        <field name="model">project.project</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lumak_secop.report_informe_actividades</field>
+        <field name="print_report_name">'Informe de actividades - %s' % (object.contrato_numero or object.name)</field>
+        <field name="paperformat_id" ref="paperformat_carta"/>
+        <field name="binding_model_id" ref="project.model_project_project"/>
+    </record>
+    <record id="action_report_aportes_pago" model="ir.actions.report">
+        <field name="name">Certificación de aportes (pago)</field>
+        <field name="model">project.project</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lumak_secop.report_aportes_pago</field>
+        <field name="print_report_name">'Certificación de aportes - %s' % (object.contrato_numero or object.name)</field>
+        <field name="paperformat_id" ref="paperformat_carta"/>
+        <field name="binding_model_id" ref="project.model_project_project"/>
+    </record>
+    <record id="action_report_derecho_peticion" model="ir.actions.report">
+        <field name="name">Derecho de petición (certificación de experiencia)</field>
+        <field name="model">project.project</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lumak_secop.report_derecho_peticion</field>
+        <field name="print_report_name">'Derecho de petición - %s' % (object.contrato_numero or object.name)</field>
+        <field name="paperformat_id" ref="paperformat_carta"/>
+        <field name="binding_model_id" ref="project.model_project_project"/>
+    </record>
+</odoo>

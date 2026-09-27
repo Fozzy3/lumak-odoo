@@ -1,0 +1,112 @@
+<odoo>
+    <!-- Plantilla para ejecutar un contrato ganado, de la legalización al certificado de experiencia -->
+    <record id="task_stage_1" model="project.task.type"><field name="name">Legalización</field><field name="sequence">1</field></record>
+    <record id="task_stage_2" model="project.task.type"><field name="name">Ejecución</field><field name="sequence">2</field></record>
+    <record id="task_stage_3" model="project.task.type"><field name="name">Facturación y pago</field><field name="sequence">3</field></record>
+    <record id="task_stage_4" model="project.task.type"><field name="name">Liquidación y cierre</field><field name="sequence">4</field></record>
+
+    <record id="project_contrato_secop" model="project.project">
+        <field name="name">Plantilla – Contrato SECOP</field>
+        <field name="is_template" eval="True"/>
+        <field name="allow_milestones" eval="True"/>
+        <field name="type_ids" eval="[(6, 0, [ref('task_stage_1'), ref('task_stage_2'), ref('task_stage_3'), ref('task_stage_4')])]"/>
+    </record>
+    <!-- Hito de pago. Si el contrato paga por entregas, se agregan hitos y Odoo reparte el valor entre ellos -->
+    <record id="milestone_contrato_secop" model="project.milestone">
+        <field name="name">Entrega y recibo a satisfacción del supervisor</field>
+        <field name="project_id" ref="project_contrato_secop"/>
+    </record>
+
+    <!-- Proyecto con cliente privado: cotización firmada en el portal → proyecto → anticipo y entrega -->
+    <record id="task_stage_privado_1" model="project.task.type"><field name="name">Por hacer</field><field name="sequence">1</field></record>
+    <record id="task_stage_privado_2" model="project.task.type"><field name="name">En curso</field><field name="sequence">2</field></record>
+    <record id="task_stage_privado_3" model="project.task.type"><field name="name">Revisión del cliente</field><field name="sequence">3</field></record>
+    <record id="task_stage_privado_4" model="project.task.type"><field name="name">Hecho</field><field name="sequence">4</field><field name="fold" eval="True"/></record>
+    <record id="project_proyecto_privado" model="project.project">
+        <field name="name">Plantilla – Proyecto privado</field>
+        <field name="is_template" eval="True"/>
+        <field name="allow_milestones" eval="True"/>
+        <field name="type_ids" eval="[(6, 0, [ref('task_stage_privado_1'), ref('task_stage_privado_2'), ref('task_stage_privado_3'), ref('task_stage_privado_4')])]"/>
+    </record>
+    <record id="milestone_privado_anticipo" model="project.milestone">
+        <field name="name">Anticipo al firmar</field><field name="sequence">1</field>
+        <field name="project_id" ref="project_proyecto_privado"/>
+    </record>
+    <record id="milestone_privado_entrega" model="project.milestone">
+        <field name="name">Entrega final aprobada</field><field name="sequence">2</field>
+        <field name="project_id" ref="project_proyecto_privado"/>
+    </record>
+    <record id="task_privado_01" model="project.task">
+        <field name="name">Levantar requisitos con el cliente</field>
+        <field name="project_id" ref="project_proyecto_privado"/><field name="stage_id" ref="task_stage_privado_1"/><field name="sequence">1</field>
+    </record>
+    <record id="task_privado_02" model="project.task">
+        <field name="name">Diseño y plan de entregas</field>
+        <field name="project_id" ref="project_proyecto_privado"/><field name="stage_id" ref="task_stage_privado_1"/><field name="sequence">2</field>
+    </record>
+    <record id="task_privado_03" model="project.task">
+        <field name="name">Desarrollo</field>
+        <field name="project_id" ref="project_proyecto_privado"/><field name="stage_id" ref="task_stage_privado_1"/><field name="sequence">3</field>
+    </record>
+    <record id="task_privado_04" model="project.task">
+        <field name="name">Pruebas con el cliente y ajustes</field>
+        <field name="project_id" ref="project_proyecto_privado"/><field name="stage_id" ref="task_stage_privado_1"/><field name="sequence">4</field>
+    </record>
+    <record id="task_privado_05" model="project.task">
+        <field name="name">Puesta en producción, capacitación y acta de entrega</field>
+        <field name="project_id" ref="project_proyecto_privado"/><field name="stage_id" ref="task_stage_privado_1"/><field name="sequence">5</field>
+    </record>
+    <record id="task_privado_06" model="project.task">
+        <field name="name">Ofrecer contrato de soporte mensual</field>
+        <field name="project_id" ref="project_proyecto_privado"/><field name="stage_id" ref="task_stage_privado_1"/><field name="sequence">6</field>
+    </record>
+
+    <record id="task_tpl_01" model="project.task">
+        <field name="name">Aprobar el contrato electrónico (usuario del representante legal)</field>
+        <field name="project_id" ref="project_contrato_secop"/><field name="stage_id" ref="task_stage_1"/><field name="sequence">1</field>
+    </record>
+    <record id="task_tpl_02" model="project.task">
+        <field name="name">Comprar la póliza y cargarla en SECOP II (si la exigen)</field>
+        <field name="project_id" ref="project_contrato_secop"/><field name="stage_id" ref="task_stage_1"/><field name="sequence">2</field>
+    </record>
+    <record id="task_tpl_03" model="project.task">
+        <field name="name">Confirmar garantía aprobada y registro presupuestal</field>
+        <field name="project_id" ref="project_contrato_secop"/><field name="stage_id" ref="task_stage_1"/><field name="sequence">3</field>
+    </record>
+    <record id="task_tpl_04" model="project.task">
+        <field name="name">Acta de inicio (si se pactó)</field>
+        <field name="project_id" ref="project_contrato_secop"/><field name="stage_id" ref="task_stage_1"/><field name="sequence">4</field>
+    </record>
+    <record id="task_tpl_05" model="project.task">
+        <field name="name">Plan de trabajo y entregables</field>
+        <field name="project_id" ref="project_contrato_secop"/><field name="stage_id" ref="task_stage_2"/><field name="sequence">5</field>
+    </record>
+    <record id="task_tpl_06" model="project.task">
+        <field name="name">Informes de ejecución al supervisor</field>
+        <field name="project_id" ref="project_contrato_secop"/><field name="stage_id" ref="task_stage_2"/><field name="sequence">6</field>
+    </record>
+    <record id="task_tpl_07" model="project.task">
+        <field name="name">Radicar factura electrónica + certificado art. 50 + informe</field>
+        <field name="project_id" ref="project_contrato_secop"/><field name="stage_id" ref="task_stage_3"/><field name="sequence">7</field>
+    </record>
+    <record id="task_tpl_08" model="project.task">
+        <field name="name">Cargar la factura en el plan de pagos de SECOP II</field>
+        <field name="project_id" ref="project_contrato_secop"/><field name="stage_id" ref="task_stage_3"/><field name="sequence">8</field>
+    </record>
+    <record id="task_tpl_09" model="project.task">
+        <field name="name">Verificar el pago y los descuentos (IVA retenido, estampillas)</field>
+        <field name="project_id" ref="project_contrato_secop"/><field name="stage_id" ref="task_stage_3"/><field name="sequence">9</field>
+    </record>
+    <record id="task_tpl_10" model="project.task">
+        <field name="name">Acta de liquidación</field>
+        <field name="project_id" ref="project_contrato_secop"/><field name="stage_id" ref="task_stage_4"/><field name="sequence">10</field>
+    </record>
+    <record id="task_tpl_11" model="project.task">
+        <field name="name">Pedir la certificación de experiencia (derecho de petición)</field>
+        <field name="project_id" ref="project_contrato_secop"/><field name="stage_id" ref="task_stage_4"/><field name="sequence">11</field>
+    </record>
+    <record id="task_tpl_12" model="project.task">
+        <field name="name">Guardar soportes para el RUP</field>
+        <field name="project_id" ref="project_contrato_secop"/><field name="stage_id" ref="task_stage_4"/><field name="sequence">12</field>
+    </record>
+</odoo>

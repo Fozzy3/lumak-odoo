@@ -1,0 +1,245 @@
+<odoo>
+    <!-- Importar desde SECOP -->
+    <record id="view_secop_import_form" model="ir.ui.view">
+        <field name="name">lumak.secop.import.form</field>
+        <field name="model">lumak.secop.import</field>
+        <field name="arch" type="xml">
+            <form string="Importar desde SECOP">
+                <p class="text-muted">Pega el enlace del proceso en SECOP II, su ID (CO1.REQ…) o su referencia.
+                    Los datos abiertos llegan con cerca de un día de retraso.</p>
+                <group>
+                    <field name="referencia" placeholder="https://community.secop.gov.co/...noticeUID=CO1.NTC..."/>
+                </group>
+                <footer>
+                    <button name="action_import" string="Importar" type="object" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_secop_import" model="ir.actions.act_window">
+        <field name="name">Importar desde SECOP</field>
+        <field name="res_model">lumak.secop.import</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Tarjetas: el color queda reservado para la urgencia del cierre -->
+    <record id="crm_lead_kanban_secop" model="ir.ui.view">
+        <field name="name">crm.lead.kanban.secop</field>
+        <field name="model">crm.lead</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id" class="o_kanban_small_column o_opportunity_kanban o_lumak_secop_kanban"
+                    on_create="quick_create" quick_create_view="crm.quick_create_opportunity_form"
+                    archivable="false" sample="1" js_class="crm_kanban" highlight_color="color">
+                <field name="stage_id" options='{"group_by_tooltip": {"requirements": "Description"}}'/>
+                <field name="probability"/>
+                <field name="active"/>
+                <field name="company_currency"/>
+                <field name="recurring_revenue_monthly"/>
+                <field name="team_id"/>
+                <field name="won_status"/>
+                <field name="secop_urgencia"/>
+                <field name="secop_mipyme"/>
+                <progressbar field="activity_state" colors='{"planned": "success", "today": "warning", "overdue": "danger"}'
+                             sum_field="expected_revenue" recurring_revenue_sum_field="recurring_revenue_monthly"/>
+                <templates>
+                    <t t-name="card">
+                        <widget name="web_ribbon" title="Perdido" bg_color="text-bg-danger" invisible="won_status != 'lost'"/>
+                        <div class="o_lumak_card_top">
+                            <field name="secop_modalidad" widget="badge" class="o_lumak_modalidad" invisible="not secop_modalidad"/>
+                            <field name="secop_cierre_label" widget="badge" class="o_lumak_cierre ms-auto"
+                                   decoration-danger="secop_urgencia in ('critica', 'vencido')"
+                                   decoration-warning="secop_urgencia == 'pronto'"
+                                   decoration-success="secop_urgencia == 'tiempo'"
+                                   decoration-muted="secop_urgencia in ('sin_fecha', 'cerrado')"/>
+                        </div>
+                        <field name="name" class="o_lumak_card_title"/>
+                        <div class="o_lumak_card_entity" invisible="not partner_id">
+                            <i class="fa fa-university" title="Entidad"/>
+                            <field name="partner_id" class="text-truncate"/>
+                        </div>
+                        <div class="o_lumak_card_money">
+                            <field name="secop_presupuesto_corto" class="o_lumak_money"/>
+                            <field name="secop_numero" class="o_lumak_ref text-truncate"/>
+                        </div>
+                        <div class="o_lumak_card_flags" invisible="not secop_mipyme">
+                            <span class="badge rounded-pill text-bg-danger"><i class="fa fa-ban me-1" title="No elegible"/>Limitado a MiPyME</span>
+                        </div>
+                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                        <footer class="pt-2">
+                            <div class="d-flex mt-auto align-items-center">
+                                <field name="priority" widget="priority" class="me-2"/>
+                                <field name="activity_ids" widget="kanban_activity"/>
+                            </div>
+                            <div class="ms-auto d-flex align-items-center">
+                                <field name="is_rotting" invisible="1"/>
+                                <field name="rotting_days" class="d-flex" widget="rotting"/>
+                                <field name="user_id" widget="many2one_avatar_user" domain="[('share', '=', False)]" class="ms-2"/>
+                            </div>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="crm_lead_list_secop" model="ir.ui.view">
+        <field name="name">crm.lead.list.secop</field>
+        <field name="model">crm.lead</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <list string="Procesos SECOP" default_order="date_deadline" sample="1" class="o_lumak_secop_list">
+                <field name="company_currency" column_invisible="1"/>
+                <field name="secop_urgencia" column_invisible="1"/>
+                <field name="secop_cierre_label" string="Cierre" widget="badge" width="190px"
+                       decoration-danger="secop_urgencia in ('critica', 'vencido')"
+                       decoration-warning="secop_urgencia == 'pronto'"
+                       decoration-success="secop_urgencia == 'tiempo'"
+                       decoration-muted="secop_urgencia in ('sin_fecha', 'cerrado')"/>
+                <field name="date_deadline" string="Fecha de cierre" optional="show" width="135px"/>
+                <field name="secop_hora_cierre" widget="float_time" optional="hide"/>
+                <field name="name" string="Proceso"/>
+                <field name="partner_id" string="Entidad" optional="show"/>
+                <field name="secop_modalidad" widget="badge" optional="show" width="190px"/>
+                <field name="secop_numero" optional="hide"/>
+                <field name="expected_revenue" string="Presupuesto" sum="Total" widget="monetary"
+                       options="{'currency_field': 'company_currency'}"/>
+                <field name="secop_valor_ofertado" optional="hide" sum="Total"/>
+                <field name="stage_id" optional="show" width="140px"/>
+                <field name="activity_ids" widget="list_activity" optional="hide"/>
+                <field name="user_id" widget="many2one_avatar_user" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="crm_lead_calendar_secop" model="ir.ui.view">
+        <field name="name">crm.lead.calendar.secop</field>
+        <field name="model">crm.lead</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <calendar string="Cierres" date_start="date_deadline" color="stage_id" mode="month"
+                      quick_create="0" event_open_popup="1">
+                <field name="partner_id"/>
+                <field name="secop_cierre_label"/>
+                <field name="secop_numero"/>
+                <field name="expected_revenue" widget="monetary"/>
+                <field name="company_currency" invisible="1"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Ficha: cuenta regresiva arriba, botón a SECOP y una pestaña con todo ordenado -->
+    <record id="crm_lead_view_form_secop" model="ir.ui.view">
+        <field name="name">crm.lead.form.secop</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_open_secop" type="object" class="oe_stat_button" icon="fa-external-link"
+                        invisible="not secop_url">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Abrir en</span>
+                        <span class="o_stat_value">SECOP</span>
+                    </div>
+                </button>
+                <button name="action_open_secop_proyecto" type="object" class="oe_stat_button" icon="fa-folder-open"
+                        invisible="not secop_proyecto_id">
+                    <field name="secop_proyecto_id" invisible="1"/>
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Proyecto del</span>
+                        <span class="o_stat_value">Contrato</span>
+                    </div>
+                </button>
+            </div>
+            <xpath expr="//div[hasclass('oe_title')]" position="before">
+                <div class="o_lumak_form_status" invisible="not secop_es_licitacion">
+                    <field name="secop_es_licitacion" invisible="1"/>
+                    <field name="secop_urgencia" invisible="1"/>
+                    <field name="secop_cierre_label" widget="badge"
+                           decoration-danger="secop_urgencia in ('critica', 'vencido')"
+                           decoration-warning="secop_urgencia == 'pronto'"
+                           decoration-success="secop_urgencia == 'tiempo'"
+                           decoration-muted="secop_urgencia in ('sin_fecha', 'cerrado')"/>
+                    <field name="secop_modalidad" widget="badge" invisible="not secop_modalidad"/>
+                    <span class="badge rounded-pill text-bg-danger" invisible="not secop_mipyme">
+                        <i class="fa fa-ban me-1" title="No elegible"/>Limitado a MiPyME
+                    </span>
+                </div>
+            </xpath>
+            <xpath expr="//notebook/page[@name='internal_notes']" position="before">
+                <page string="SECOP" name="secop" invisible="not secop_es_licitacion">
+                    <group>
+                        <group string="Proceso">
+                            <field name="secop_numero"/>
+                            <field name="secop_modalidad"/>
+                            <field name="secop_unspsc"/>
+                            <field name="secop_url" widget="url"/>
+                            <field name="secop_id" readonly="1"/>
+                        </group>
+                        <group string="Fechas">
+                            <field name="secop_limite_observaciones"/>
+                            <field name="date_deadline" string="Fecha de cierre"/>
+                            <field name="secop_hora_cierre" widget="float_time"/>
+                        </group>
+                        <group string="Dinero">
+                            <field name="expected_revenue" string="Presupuesto oficial" widget="monetary"
+                                   options="{'currency_field': 'company_currency'}"/>
+                            <field name="secop_estampillas"/>
+                            <field name="secop_costo_estimado"/>
+                            <field name="secop_precio_minimo" invisible="not secop_costo_estimado"/>
+                            <field name="secop_valor_ofertado"/>
+                            <field name="secop_precio_bajo" invisible="1"/>
+                            <div colspan="2" class="text-danger" invisible="not secop_precio_bajo">
+                                La cotización sin IVA queda por debajo del precio mínimo: no cubre el costo, el SIMPLE y las estampillas.
+                            </div>
+                            <field name="secop_pago_contra_entrega"/>
+                            <field name="secop_exige_garantias"/>
+                            <field name="secop_mipyme"/>
+                        </group>
+                        <group string="Resultado">
+                            <field name="secop_oferentes"/>
+                            <field name="secop_precio_ganador"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- El flujo genérico del CRM queda para clientes privados, llegue uno por el menú o recargando /odoo/crm.
+         Sin el filtro «Mi flujo»: en una empresa de una persona solo confunde. -->
+    <record id="crm.crm_lead_action_pipeline" model="ir.actions.act_window">
+        <field name="domain">[('type', '=', 'opportunity'), '|', ('team_id', '=', False), ('team_id.es_licitaciones', '=', False)]</field>
+        <field name="context">{'default_type': 'opportunity', 'show_user_team_stages': 1}</field>
+    </record>
+    <function model="crm.team" name="_secop_rename_private_pipeline"/>
+
+    <!-- Menú Licitaciones -->
+    <record id="action_secop_dashboard" model="ir.actions.client">
+        <field name="name">Tablero</field>
+        <field name="tag">lumak_secop_dashboard</field>
+    </record>
+
+    <!-- Acción de servidor: el equipo lo crea scripts/crm_secop.py, así que se busca al abrir el menú -->
+    <record id="action_secop_pipeline" model="ir.actions.server">
+        <field name="name">Licitaciones SECOP</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_secop_pipeline()</field>
+    </record>
+
+    <!-- App «Lumak»: el tablero de toda la empresa. Va primera, así /odoo abre en ella al entrar -->
+    <menuitem id="menu_lumak_root" name="Lumak" web_icon="lumak_secop,static/description/icon.png" sequence="-10"
+              action="action_secop_dashboard"/>
+    <menuitem id="menu_lumak_tablero" name="Tablero" parent="menu_lumak_root" action="action_secop_dashboard" sequence="1"/>
+
+    <!-- Primero en el CRM: al abrir la app se entra a los procesos SECOP -->
+    <menuitem id="menu_secop_root" name="Licitaciones" parent="crm.crm_menu_root" sequence="0"/>
+    <menuitem id="menu_secop_pipeline" name="Procesos SECOP" parent="menu_secop_root"
+              action="action_secop_pipeline" sequence="1"/>
+    <menuitem id="menu_secop_import" name="Importar desde SECOP" parent="menu_secop_root"
+              action="action_secop_import" sequence="2"/>
+</odoo>

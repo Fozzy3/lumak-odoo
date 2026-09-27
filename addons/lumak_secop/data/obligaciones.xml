@@ -1,0 +1,204 @@
+<odoo>
+    <!-- Fechas legales y pendientes de la empresa en el Calendario (fuentes: docs/plan-operacion-lumak.md).
+         noupdate: se pueden mover o borrar en Odoo sin que una actualización las devuelva -->
+    <data noupdate="1">
+        <record id="obligacion_01" model="calendar.event">
+            <field name="name">Comprar el dominio lumak.co</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2026-09-27 12:00:00</field>
+            <field name="stop">2026-09-27 12:00:00</field>
+            <field name="description">En Cloudflare, donde ya están los otros dominios.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_02" model="calendar.event">
+            <field name="name">Usuario DIAN, firma electrónica y actualizar el RUT</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2026-10-01 12:00:00</field>
+            <field name="stop">2026-10-01 12:00:00</field>
+            <field name="description">Agregar las actividades 6311, 6202 y 8559. La firma electrónica de la DIAN es gratis.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_03" model="calendar.event">
+            <field name="name">Abrir la cuenta en Caja Social y consignar el capital</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2026-10-02 12:00:00</field>
+            <field name="stop">2026-10-02 12:00:00</field>
+            <field name="description">$1.500.000 de capital pagado.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_04" model="calendar.event">
+            <field name="name">Habilitar la facturación electrónica gratuita de la DIAN</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2026-10-09 12:00:00</field>
+            <field name="stop">2026-10-09 12:00:00</field>
+            <field name="description">Registro como «Software gratuito», set de pruebas, numeración (formatos 1302 y 1876) y prefijo.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_05" model="calendar.event">
+            <field name="name">Registrarse como proveedor en SECOP II</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2026-10-09 12:00:00</field>
+            <field name="stop">2026-10-09 12:00:00</field>
+            <field name="description">Con estados financieros de apertura y los formatos de CCE (capacidad, experiencia, autorización de consultas).</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_06" model="calendar.event">
+            <field name="name">Verificar la inscripción en el RIT de Bogotá</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2026-10-15 12:00:00</field>
+            <field name="stop">2026-10-15 12:00:00</field>
+            <field name="description"></field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_07" model="calendar.event">
+            <field name="name">LÍMITE: anticipo SIMPLE sep–oct (formulario 2593)</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2026-11-24 12:00:00</field>
+            <field name="stop">2026-11-24 12:00:00</field>
+            <field name="description">Obligatorio aunque dé $0.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_08" model="calendar.event">
+            <field name="name">LÍMITE: reporte inicial del RUB (beneficiarios finales)</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2026-11-26 12:00:00</field>
+            <field name="stop">2026-11-26 12:00:00</field>
+            <field name="description"></field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_09" model="calendar.event">
+            <field name="name">LÍMITE: habilitarse como facturador electrónico</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2026-11-26 12:00:00</field>
+            <field name="stop">2026-11-26 12:00:00</field>
+            <field name="description">Dos meses desde la inscripción en el RUT: confirmar la fecha exacta en el RUT.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_10" model="calendar.event">
+            <field name="name">Preparar el cierre 2026 y bajar el calendario DIAN 2027</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2026-12-01 12:00:00</field>
+            <field name="stop">2026-12-01 12:00:00</field>
+            <field name="description">Las fechas de 2027 de este calendario son cálculo propio: corregirlas con el calendario oficial.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_11" model="calendar.event">
+            <field name="name">LÍMITE: anticipo SIMPLE nov–dic 2026 (formulario 2593)</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2027-01-25 12:00:00</field>
+            <field name="stop">2027-01-25 12:00:00</field>
+            <field name="description"></field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_12" model="calendar.event">
+            <field name="name">Inscribir el RUP</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2027-02-15 12:00:00</field>
+            <field name="stop">2027-02-15 12:00:00</field>
+            <field name="description">Con los estados 2026 y la experiencia del socio. Tarda unas 5 semanas y cuesta $831.000 al año. Meta: en firme antes de sep 2027.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_13" model="calendar.event">
+            <field name="name">IVA anual 2026 (formulario 300), solo si hubo operaciones</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2027-02-19 12:00:00</field>
+            <field name="stop">2027-02-19 12:00:00</field>
+            <field name="description">Si da saldo a favor, la firma un contador.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_14" model="calendar.event">
+            <field name="name">Aprobar los estados financieros 2026</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2027-03-15 12:00:00</field>
+            <field name="stop">2027-03-15 12:00:00</field>
+            <field name="description">Acta del accionista único. Para repartir dividendos, el contador los dictamina antes.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_15" model="calendar.event">
+            <field name="name">LÍMITE: renovación de la matrícula mercantil</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2027-03-31 12:00:00</field>
+            <field name="stop">2027-03-31 12:00:00</field>
+            <field name="description">Sin renovar, el certificado de Cámara puede tumbar una oferta.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_16" model="calendar.event">
+            <field name="name">Declaración anual SIMPLE 2026 (formulario 260)</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2027-04-15 12:00:00</field>
+            <field name="stop">2027-04-15 12:00:00</field>
+            <field name="description">Vence hacia el 21 de abril para NIT terminado en 9: presentarla con margen.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_17" model="calendar.event">
+            <field name="name">Anticipo SIMPLE ene–feb 2027 (aprox.)</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2027-05-24 12:00:00</field>
+            <field name="stop">2027-05-24 12:00:00</field>
+            <field name="description">Confirmar con el calendario DIAN 2027.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_18" model="calendar.event">
+            <field name="name">Anticipo SIMPLE mar–abr 2027 (aprox.)</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2027-06-22 12:00:00</field>
+            <field name="stop">2027-06-22 12:00:00</field>
+            <field name="description">Confirmar con el calendario DIAN 2027.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_19" model="calendar.event">
+            <field name="name">Anticipo SIMPLE may–jun 2027 (aprox.)</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2027-07-23 12:00:00</field>
+            <field name="stop">2027-07-23 12:00:00</field>
+            <field name="description">Confirmar con el calendario DIAN 2027.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_20" model="calendar.event">
+            <field name="name">Anticipo SIMPLE jul–ago 2027 (aprox.)</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2027-09-21 12:00:00</field>
+            <field name="stop">2027-09-21 12:00:00</field>
+            <field name="description">Confirmar con el calendario DIAN 2027.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_21" model="calendar.event">
+            <field name="name">Lumak cumple un año: ya puede competir en procesos limitados a MiPyME</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2027-09-26 12:00:00</field>
+            <field name="stop">2027-09-26 12:00:00</field>
+            <field name="description"></field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+        <record id="obligacion_22" model="calendar.event">
+            <field name="name">Anticipo SIMPLE sep–oct 2027 (aprox.)</field>
+            <field name="secop_tipo">obligacion</field>
+            <field name="allday" eval="True"/>
+            <field name="start">2027-11-23 12:00:00</field>
+            <field name="stop">2027-11-23 12:00:00</field>
+            <field name="description">Confirmar con el calendario DIAN 2027.</field>
+            <field name="alarm_ids" eval="[(6, 0, [ref('calendar.alarm_notif_5')])]"/>
+        </record>
+    </data>
+</odoo>

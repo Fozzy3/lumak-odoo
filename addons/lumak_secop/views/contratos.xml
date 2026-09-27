@@ -1,0 +1,104 @@
+<odoo>
+    <!-- Desde el proyecto del contrato se vuelve al proceso que lo originó -->
+    <record id="project_view_form_secop" model="ir.ui.view">
+        <field name="name">project.project.form.secop</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <header position="inside">
+                <button name="action_registrar_experiencia" type="object" string="Registrar experiencia"
+                        invisible="not sale_line_id" help="Al terminar: deja el contrato listo para el formato de experiencia de las próximas ofertas."/>
+            </header>
+            <page name="settings" position="before">
+                <page string="Contrato" name="contrato" invisible="not sale_line_id">
+                    <group>
+                        <group>
+                            <field name="sale_line_id" invisible="1"/>
+                            <field name="contrato_numero"/>
+                            <field name="supervisor"/>
+                            <field name="contrato_objeto"/>
+                        </group>
+                        <group>
+                            <field name="contrato_valor"/>
+                            <field name="date_start" string="Inicio"/>
+                            <field name="date" string="Terminación"/>
+                        </group>
+                    </group>
+                    <p class="text-muted">Para cada pago, menú Imprimir: «Informe de actividades» y «Certificación de aportes (pago)».
+                        Al terminar: «Derecho de petición (certificación de experiencia)» y el botón «Registrar experiencia».</p>
+                </page>
+            </page>
+            <div name="button_box" position="inside">
+                <field name="secop_lead_id" invisible="1"/>
+                <button name="action_open_secop_lead" type="object" class="oe_stat_button" icon="fa-university"
+                        invisible="not secop_lead_id">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Proceso</span>
+                        <span class="o_stat_value">SECOP</span>
+                    </div>
+                </button>
+            </div>
+        </field>
+    </record>
+
+    <!-- Experiencia certificable: alimenta el formato de experiencia de cada oferta -->
+    <record id="lumak_experiencia_list" model="ir.ui.view">
+        <field name="name">lumak.experiencia.list</field>
+        <field name="model">lumak.experiencia</field>
+        <field name="arch" type="xml">
+            <!-- En gris: la que todavía no va en el formato de experiencia (soporte pendiente o contrato sin terminar) -->
+            <list string="Experiencia" decoration-muted="not en_oferta">
+                <field name="en_oferta" string="En ofertas" widget="boolean_toggle"/>
+                <field name="contratante_id"/>
+                <field name="objeto"/>
+                <field name="contrato_numero" optional="show"/>
+                <field name="fecha_fin"/>
+                <field name="valor" sum="Total"/>
+                <field name="de_socio" optional="hide"/>
+                <field name="soporte_nombre" string="Soporte" optional="hide"/>
+            </list>
+        </field>
+    </record>
+    <record id="lumak_experiencia_form" model="ir.ui.view">
+        <field name="name">lumak.experiencia.form</field>
+        <field name="model">lumak.experiencia</field>
+        <field name="arch" type="xml">
+            <form string="Experiencia">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="contratante_id"/>
+                            <field name="publico"/>
+                            <field name="de_socio"/>
+                            <field name="contrato_numero"/>
+                            <field name="unspsc"/>
+                        </group>
+                        <group>
+                            <field name="fecha_inicio"/>
+                            <field name="fecha_fin"/>
+                            <field name="valor"/>
+                            <field name="contacto"/>
+                            <field name="soporte" filename="soporte_nombre"/>
+                            <field name="soporte_nombre" invisible="1"/>
+                            <field name="en_oferta"/>
+                            <field name="correccion" placeholder="Solo si la certificación trae un error"/>
+                            <field name="proyecto_id" readonly="1" invisible="not proyecto_id"/>
+                        </group>
+                    </group>
+                    <field name="objeto" placeholder="Objeto tal como lo dice el contrato o la certificación"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_lumak_experiencia" model="ir.actions.act_window">
+        <field name="name">Experiencia</field>
+        <field name="res_model">lumak.experiencia</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Registra los contratos que prueban experiencia.</p>
+            <p>Los del socio valen para la empresa sus tres primeros años. Los cinco de mayor valor van solos en el formato de
+                experiencia de cada oferta.</p>
+        </field>
+    </record>
+    <menuitem id="menu_secop_experiencia" name="Experiencia" parent="menu_lumak_root" action="action_lumak_experiencia" sequence="3"/>
+</odoo>

@@ -1,0 +1,196 @@
+<odoo>
+    <!-- Equipo y etapas. Diseño y fuentes: docs/licitaciones-secop.md -->
+    <record id="team_secop" model="crm.team">
+        <field name="name">Licitaciones SECOP</field>
+        <field name="use_leads" eval="False"/>
+        <field name="use_opportunities" eval="True"/>
+        <field name="es_licitaciones" eval="True"/>
+    </record>
+
+    <!-- Las etapas por defecto de Odoo son globales: se dejan solo para el equipo de Ventas -->
+    <record id="crm.stage_lead1" model="crm.stage">
+        <field name="team_ids" eval="[(6, 0, [ref('sales_team.team_sales_department')])]"/>
+    </record>
+    <record id="crm.stage_lead2" model="crm.stage">
+        <field name="team_ids" eval="[(6, 0, [ref('sales_team.team_sales_department')])]"/>
+    </record>
+    <record id="crm.stage_lead3" model="crm.stage">
+        <field name="team_ids" eval="[(6, 0, [ref('sales_team.team_sales_department')])]"/>
+    </record>
+    <record id="crm.stage_lead4" model="crm.stage">
+        <field name="team_ids" eval="[(6, 0, [ref('sales_team.team_sales_department')])]"/>
+    </record>
+
+    <!-- rotting_threshold_days: días en la etapa antes de marcar el proceso como estancado -->
+    <record id="stage_detectado" model="crm.stage">
+        <field name="name">Detectado</field>
+        <field name="sequence">101</field>
+        <field name="team_ids" eval="[(6, 0, [ref('team_secop')])]"/>
+        <field name="rotting_threshold_days">1</field>
+        <field name="requirements">Número de proceso, enlace, entidad (contacto), modalidad y fecha y hora de cierre. En SECOP II: clic en «Suscribirme»; sin eso no se puede observar ni ofertar.</field>
+    </record>
+    <record id="stage_evaluando" model="crm.stage">
+        <field name="name">Evaluando</field>
+        <field name="sequence">102</field>
+        <field name="team_ids" eval="[(6, 0, [ref('team_secop')])]"/>
+        <field name="rotting_threshold_days">1</field>
+        <field name="requirements">Leer la invitación: objeto, presupuesto, experiencia, garantías, forma de pago y estampillas. Descartar si está limitado a MiPyME (Lumak no es elegible hasta el 26 sep 2027) o cubierto por acuerdo marco. Observaciones dentro del plazo. Si no vamos: marcar perdido con el motivo.</field>
+    </record>
+    <record id="stage_preparando" model="crm.stage">
+        <field name="name">Preparando oferta</field>
+        <field name="sequence">103</field>
+        <field name="team_ids" eval="[(6, 0, [ref('team_secop')])]"/>
+        <field name="rotting_threshold_days">1</field>
+        <field name="requirements">Al entrar aquí Odoo crea la cotización (la oferta económica, al tope del presupuesto) y agenda el plan «Oferta mínima cuantía» desde la fecha de cierre. Kit al día: certificado de existencia de 30 días o menos, aportes art. 50, antecedentes. Precio: base sin IVA ≥ costo ÷ (1 − 0,059 − estampillas); la lista de precios de SECOP debe ser igual al anexo.</field>
+    </record>
+    <record id="stage_presentada" model="crm.stage">
+        <field name="name">Oferta presentada</field>
+        <field name="sequence">104</field>
+        <field name="team_ids" eval="[(6, 0, [ref('team_secop')])]"/>
+        <field name="rotting_threshold_days">3</field>
+        <field name="requirements">Estado «Presentada» verificado en SECOP II. Si una adenda cambia el cuestionario: retirar y volver a presentar. Lanzar el plan «Después del cierre».</field>
+    </record>
+    <record id="stage_evaluacion" model="crm.stage">
+        <field name="name">En evaluación</field>
+        <field name="sequence">105</field>
+        <field name="team_ids" eval="[(6, 0, [ref('team_secop')])]"/>
+        <field name="rotting_threshold_days">3</field>
+        <field name="requirements">Revisar el informe de evaluación. Subsanar por «Mensajes» dentro del plazo preclusivo (la oferta económica nunca se subsana). Registrar n.º de oferentes y precio ganador.</field>
+    </record>
+    <record id="stage_adjudicado" model="crm.stage">
+        <field name="name">Adjudicado</field>
+        <field name="sequence">106</field>
+        <field name="team_ids" eval="[(6, 0, [ref('team_secop')])]"/>
+        <field name="rotting_threshold_days">0</field>
+        <field name="is_won" eval="True"/>
+        <field name="requirements">Al entrar aquí Odoo confirma la cotización y abre el proyecto del contrato desde la plantilla. En SECOP II: aprobar el contrato electrónico con el usuario del representante legal.</field>
+    </record>
+
+    <!-- Motivos de pérdida -->
+    <record id="lost_no_ofertamos" model="crm.lost.reason"><field name="name">Decidimos no ofertar</field></record>
+    <record id="lost_mipyme" model="crm.lost.reason"><field name="name">Limitado a MiPyME (no elegible)</field></record>
+    <record id="lost_acuerdo_marco" model="crm.lost.reason"><field name="name">Cubierto por acuerdo marco</field></record>
+    <record id="lost_precio" model="crm.lost.reason"><field name="name">Otro oferente con menor precio</field></record>
+    <record id="lost_no_subsano" model="crm.lost.reason"><field name="name">No subsanamos a tiempo</field></record>
+    <record id="lost_no_subsanable" model="crm.lost.reason"><field name="name">Rechazada por requisito no subsanable</field></record>
+    <record id="lost_precio_bajo" model="crm.lost.reason"><field name="name">Precio artificialmente bajo</field></record>
+    <record id="lost_desierto" model="crm.lost.reason"><field name="name">Proceso desierto</field></record>
+    <record id="lost_cancelado" model="crm.lost.reason"><field name="name">Proceso cancelado o revocado</field></record>
+    <record id="lost_tarde" model="crm.lost.reason"><field name="name">Llegamos tarde al cierre</field></record>
+
+    <!-- Etiquetas. SIM (color 0) marca lo simulado y no se pinta en las tarjetas -->
+    <record id="tag_software" model="crm.tag"><field name="name">Software a la medida</field><field name="color">4</field></record>
+    <record id="tag_saas" model="crm.tag"><field name="name">SaaS</field><field name="color">10</field></record>
+    <record id="tag_soporte" model="crm.tag"><field name="name">Soporte y mantenimiento</field><field name="color">2</field></record>
+    <record id="tag_capacitacion" model="crm.tag"><field name="name">Capacitación</field><field name="color">3</field></record>
+    <record id="tag_territorial" model="crm.tag"><field name="name">Territorial</field><field name="color">7</field></record>
+    <record id="tag_nacional" model="crm.tag"><field name="name">Nacional</field><field name="color">8</field></record>
+    <record id="tag_sim" model="crm.tag"><field name="name">SIM</field><field name="color">0</field></record>
+
+    <!-- Planes de actividades: los días se cuentan desde la fecha de cierre (calendario, no hábiles) -->
+    <record id="plan_oferta_mc" model="mail.activity.plan">
+        <field name="name">Oferta mínima cuantía</field>
+        <field name="res_model">crm.lead</field>
+    </record>
+    <record id="plan_oferta_mc_01" model="mail.activity.plan.template">
+        <field name="plan_id" ref="plan_oferta_mc"/><field name="sequence">1</field>
+        <field name="activity_type_id" ref="mail.mail_activity_data_todo"/>
+        <field name="summary">Leer la invitación y decidir si vamos</field>
+        <field name="note">Objeto, presupuesto, experiencia, garantías, forma de pago, estampillas. ¿Limitado a MiPyME?</field>
+        <field name="delay_count">2</field><field name="delay_unit">days</field><field name="delay_from">before_plan_date</field>
+        <field name="responsible_type">on_demand</field>
+    </record>
+    <record id="plan_oferta_mc_02" model="mail.activity.plan.template">
+        <field name="plan_id" ref="plan_oferta_mc"/><field name="sequence">2</field>
+        <field name="activity_type_id" ref="mail.mail_activity_data_todo"/>
+        <field name="summary">Enviar observaciones en SECOP II (si hay dudas)</field>
+        <field name="note">Pestaña «Observaciones», dentro del plazo.</field>
+        <field name="delay_count">2</field><field name="delay_unit">days</field><field name="delay_from">before_plan_date</field>
+        <field name="responsible_type">on_demand</field>
+    </record>
+    <record id="plan_oferta_mc_03" model="mail.activity.plan.template">
+        <field name="plan_id" ref="plan_oferta_mc"/><field name="sequence">3</field>
+        <field name="activity_type_id" ref="mail.mail_activity_data_upload_document"/>
+        <field name="summary">Renovar lo que vence en el Kit de la empresa</field>
+        <field name="note">Licitaciones → Kit de la empresa: Cámara (30 días o menos), antecedentes, REDAM. Odoo junta los vigentes al cierre.</field>
+        <field name="delay_count">1</field><field name="delay_unit">days</field><field name="delay_from">before_plan_date</field>
+        <field name="responsible_type">on_demand</field>
+    </record>
+    <record id="plan_oferta_mc_04" model="mail.activity.plan.template">
+        <field name="plan_id" ref="plan_oferta_mc"/><field name="sequence">4</field>
+        <field name="activity_type_id" ref="mail.mail_activity_data_upload_document"/>
+        <field name="summary">Experiencia, MiPyME y formatos propios de la invitación</field>
+        <field name="note">Certificaciones de experiencia anteriores al cierre, certificación MiPyME para desempate (la firma también el contador) y anexos que la entidad pida aparte.</field>
+        <field name="delay_count">1</field><field name="delay_unit">days</field><field name="delay_from">before_plan_date</field>
+        <field name="responsible_type">on_demand</field>
+    </record>
+    <record id="plan_oferta_mc_05" model="mail.activity.plan.template">
+        <field name="plan_id" ref="plan_oferta_mc"/><field name="sequence">5</field>
+        <field name="activity_type_id" ref="mail.mail_activity_data_todo"/>
+        <field name="summary">Precio final en la cotización</field>
+        <field name="note">Costo estimado en la pestaña SECOP: la cotización no puede quedar por debajo del precio mínimo ni por encima del presupuesto. La lista de precios de SECOP debe ser igual.</field>
+        <field name="delay_count">1</field><field name="delay_unit">days</field><field name="delay_from">before_plan_date</field>
+        <field name="responsible_type">on_demand</field>
+    </record>
+    <record id="plan_oferta_mc_06" model="mail.activity.plan.template">
+        <field name="plan_id" ref="plan_oferta_mc"/><field name="sequence">6</field>
+        <field name="activity_type_id" ref="mail.mail_activity_data_upload_document"/>
+        <field name="summary">Preparar documentos de la oferta y firmarlos</field>
+        <field name="note">Botón «Preparar documentos de la oferta»: carta, oferta económica, aportes, anticorrupción, inhabilidades y el kit vigente, en un ZIP.</field>
+        <field name="delay_count">1</field><field name="delay_unit">days</field><field name="delay_from">before_plan_date</field>
+        <field name="responsible_type">on_demand</field>
+    </record>
+    <record id="plan_oferta_mc_07" model="mail.activity.plan.template">
+        <field name="plan_id" ref="plan_oferta_mc"/><field name="sequence">7</field>
+        <field name="activity_type_id" ref="mail.mail_activity_data_todo"/>
+        <field name="summary">Revisar adendas y «Aplicar modificación»</field>
+        <field name="note">Si cambian el cuestionario: retirar y volver a presentar. Si una adenda llega después de generar la carta, generarla otra vez.</field>
+        <field name="delay_count">0</field><field name="delay_unit">days</field><field name="delay_from">before_plan_date</field>
+        <field name="responsible_type">on_demand</field>
+    </record>
+    <record id="plan_oferta_mc_08" model="mail.activity.plan.template">
+        <field name="plan_id" ref="plan_oferta_mc"/><field name="sequence">8</field>
+        <field name="activity_type_id" ref="mail.mail_activity_data_todo"/>
+        <field name="summary">Presentar la oferta y verificar el estado «Presentada»</field>
+        <field name="note">Desde el usuario del representante legal. El cronómetro cierra a la hora exacta.</field>
+        <field name="delay_count">0</field><field name="delay_unit">days</field><field name="delay_from">before_plan_date</field>
+        <field name="responsible_type">on_demand</field>
+    </record>
+
+    <record id="plan_post_cierre" model="mail.activity.plan">
+        <field name="name">Después del cierre</field>
+        <field name="res_model">crm.lead</field>
+    </record>
+    <record id="plan_post_cierre_01" model="mail.activity.plan.template">
+        <field name="plan_id" ref="plan_post_cierre"/><field name="sequence">1</field>
+        <field name="activity_type_id" ref="mail.mail_activity_data_todo"/>
+        <field name="summary">Revisar el acta de cierre</field>
+        <field name="note">Registrar n.º de oferentes y sus precios.</field>
+        <field name="delay_count">1</field><field name="delay_unit">days</field><field name="delay_from">after_plan_date</field>
+        <field name="responsible_type">on_demand</field>
+    </record>
+    <record id="plan_post_cierre_02" model="mail.activity.plan.template">
+        <field name="plan_id" ref="plan_post_cierre"/><field name="sequence">2</field>
+        <field name="activity_type_id" ref="mail.mail_activity_data_todo"/>
+        <field name="summary">Revisar el informe de evaluación y subsanar</field>
+        <field name="note">Por «Mensajes», dentro del plazo preclusivo.</field>
+        <field name="delay_count">2</field><field name="delay_unit">days</field><field name="delay_from">after_plan_date</field>
+        <field name="responsible_type">on_demand</field>
+    </record>
+    <record id="plan_post_cierre_03" model="mail.activity.plan.template">
+        <field name="plan_id" ref="plan_post_cierre"/><field name="sequence">3</field>
+        <field name="activity_type_id" ref="mail.mail_activity_data_todo"/>
+        <field name="summary">Observaciones al informe (si aplica)</field>
+        <field name="note">Traslado de al menos 1 día hábil.</field>
+        <field name="delay_count">3</field><field name="delay_unit">days</field><field name="delay_from">after_plan_date</field>
+        <field name="responsible_type">on_demand</field>
+    </record>
+    <record id="plan_post_cierre_04" model="mail.activity.plan.template">
+        <field name="plan_id" ref="plan_post_cierre"/><field name="sequence">4</field>
+        <field name="activity_type_id" ref="mail.mail_activity_data_todo"/>
+        <field name="summary">Si ganamos: aprobar el contrato electrónico</field>
+        <field name="note">Solo con el usuario del representante legal.</field>
+        <field name="delay_count">3</field><field name="delay_unit">days</field><field name="delay_from">after_plan_date</field>
+        <field name="responsible_type">on_demand</field>
+    </record>
+</odoo>

@@ -1,0 +1,25 @@
+<odoo>
+    <!-- Fechas legales de la empresa (data/obligaciones.xml): anticipos, IVA, RUB, matrícula, RUP -->
+    <record id="calendar_event_list_fechas" model="ir.ui.view">
+        <field name="name">calendar.event.list.fechas</field>
+        <field name="model">calendar.event</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <list string="Fechas de la empresa" default_order="start">
+                <field name="start_date" string="Fecha"/>
+                <field name="name" string="Qué"/>
+                <field name="description" string="Nota" optional="show"/>
+                <field name="start" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_lumak_fechas" model="ir.actions.act_window">
+        <field name="name">Fechas de la empresa</field>
+        <field name="res_model">calendar.event</field>
+        <field name="view_mode">list,calendar,form</field>
+        <field name="view_id" ref="calendar_event_list_fechas"/>
+        <field name="domain">[('secop_tipo', '=', 'obligacion')]</field>
+        <field name="context">{'default_secop_tipo': 'obligacion', 'default_allday': True}</field>
+    </record>
+    <menuitem id="menu_lumak_fechas" name="Fechas de la empresa" parent="menu_lumak_root" action="action_lumak_fechas" sequence="4"/>
+</odoo>

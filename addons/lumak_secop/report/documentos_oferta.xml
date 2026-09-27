@@ -1,0 +1,309 @@
+<odoo>
+    <!-- Documentos de la oferta. Textos adaptados de los formatos del Documento Tipo de mínima cuantía de CCE (V3, 2024):
+         docs/licitaciones-secop.md. Llevan línea de firma: se firman a mano y se escanean, o se suben desde el usuario
+         del representante legal en SECOP II (su firma electrónica). Una imagen de firma pegada puede tomarse como no firmado. -->
+
+    <!-- Membrete propio: el encabezado estándar de Odoo muestra «Your logo» mientras la compañía no tenga logo -->
+    <template id="secop_membrete">
+        <div style="border-bottom: 2px solid #1F2A44; padding-bottom: 6px; margin-bottom: 22px; font-size: 9pt; color: #444;">
+            <strong style="color: #1F2A44; font-size: 12pt;" t-out="d['company'].name"/><br/>
+            <t t-set="c" t-value="d['company']"/>
+            <t t-out="' · '.join(filter(None, ['NIT %s' % c.vat if c.vat else '', c.street, c.city, c.phone, c.email]))"/>
+        </div>
+    </template>
+
+    <template id="secop_encabezado">
+        <p><t t-out="d['company'].city"/>, <t t-out="d['fecha']"/></p>
+        <p>Señores<br/><strong t-out="o.partner_id.name"/><br/>
+            <t t-if="o.partner_id.street"><t t-out="o.partner_id.street"/><br/></t>
+            <t t-out="o.partner_id.city"/></p>
+        <p><strong>Referencia:</strong> Proceso de contratación n.º <t t-out="o.secop_numero"/> – <t t-out="d['modalidad']"/><br/>
+            <strong>Objeto:</strong> <t t-out="o.name"/></p>
+    </template>
+
+    <template id="secop_firma">
+        <div style="margin-top: 56px; page-break-inside: avoid;">
+            <p>______________________________<br/>
+                <strong t-out="d['company'].lumak_representante"/><br/>
+                C.C. <t t-out="d['company'].lumak_representante_cc"/><br/>
+                Representante legal – <t t-out="d['company'].name"/> – NIT <t t-out="d['company'].vat"/></p>
+        </div>
+    </template>
+
+    <!-- 1. Carta de presentación -->
+    <template id="report_carta_presentacion">
+        <t>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="d" t-value="o._secop_docs()"/>
+                <t t-set="c" t-value="d['company']"/>
+                <t t-set="q" t-value="d['cotizacion']"/>
+                <t t-call="web.basic_layout">
+                    <div class="page" style="font-size: 11pt;">
+                        <t t-call="lumak_secop.secop_membrete"/>
+                        <t t-call="lumak_secop.secop_encabezado"/>
+                        <p><strong>Asunto: Carta de presentación de la oferta</strong></p>
+                        <p>Yo, <t t-out="c.lumak_representante"/>, identificado con cédula de ciudadanía n.º <t t-out="c.lumak_representante_cc"/>
+                            expedida en <t t-out="c.lumak_representante_cc_expedida"/>, en mi calidad de representante legal de <t t-out="c.name"/>,
+                            NIT <t t-out="c.vat"/> (el «Proponente»), presento oferta para el proceso de la referencia y manifiesto, bajo la gravedad
+                            del juramento, que se entiende prestado con la firma de este documento, que:</p>
+                        <ol>
+                            <li>Estoy facultado para presentar esta oferta y celebrar el contrato si resulto adjudicatario, sin limitaciones
+                                estatutarias de cuantía, según el certificado de existencia y representación legal adjunto.</li>
+                            <li>Conozco los documentos del proceso, incluidas las adendas (<t t-out="o.secop_adendas"/>), y acepto sin
+                                condicionamientos los requisitos, las obligaciones y el cronograma de la invitación.</li>
+                            <li>Ofrezco ejecutar el objeto del contrato por un valor total de <strong t-out="d['valor_letras']"/>
+                                (<span t-field="q.amount_total"/>), IVA incluido cuando aplique, <t t-if="o.secop_plazo">en un plazo de <t t-out="o.secop_plazo"/></t><t t-else="">en el plazo previsto en la
+                                invitación</t>, conforme al anexo de oferta económica y a la
+                                lista de precios registrada en el SECOP II. Si hubiere diferencia, prevalece el valor registrado en la plataforma.</li>
+                            <li>La oferta tiene una validez de <t t-out="o.secop_validez_dias"/> días calendario contados desde el cierre del proceso.</li>
+                            <li>La oferta incluye todos los costos directos e indirectos, impuestos, tasas y contribuciones de la suscripción y
+                                ejecución del contrato. El Proponente es contribuyente del Régimen Simple de Tributación (responsabilidad 47 del
+                                RUT) y responsable del impuesto sobre las ventas.</li>
+                            <li>Ni el Proponente, ni su representante legal, ni sus socios estamos incursos en causal de inhabilidad,
+                                incompatibilidad o prohibición para contratar, en especial las de los artículos 8 y 9 de la Ley 80 de 1993,
+                                ni en conflicto de intereses respecto de este proceso. Si alguna sobreviene, la informaré de inmediato a la Entidad.</li>
+                            <li>Ni el Proponente, ni su representante legal, ni sus socios hemos sido declarados responsables judicialmente
+                                por delitos contra la administración pública, soborno transnacional, lavado de activos u otros actos de
+                                corrupción, ni estamos reportados en el Boletín de Responsables Fiscales de la Contraloría General de la República.</li>
+                            <li>El representante legal no se encuentra inscrito en el Registro de Deudores Alimentarios Morosos (Ley 2097 de 2021, art. 6).</li>
+                            <li>Conozco y acepto el pacto de transparencia o compromiso anticorrupción de la invitación y me obligo a cumplirlo.</li>
+                            <li>Los recursos del Proponente y los destinados a la ejecución del contrato son de origen lícito.</li>
+                            <li>La información y los documentos de la oferta son veraces; respondo ante la Entidad por datos falsos o inexactos.</li>
+                            <li>Si la oferta es aceptada y la invitación exige garantías, las constituiré dentro del plazo previsto.</li>
+                            <li>El Proponente está al día con el Sistema de Seguridad Social Integral y los aportes parafiscales, según la
+                                certificación del artículo 50 de la Ley 789 de 2002 que adjunto.</li>
+                            <li>Acepto los Términos y Condiciones de Uso del SECOP II y que las comunicaciones del proceso se hagan por el
+                                usuario del Proponente en el SECOP II y al correo indicado abajo (Ley 1437 de 2011, art. 56).</li>
+                            <!-- ponytail: composición accionaria fija en 100 % del representante; cambiarla si entra un socio -->
+                            <li>Tipo de proponente: persona jurídica nacional. Composición accionaria: <t t-out="c.lumak_representante"/> (100 %).
+                                La oferta no contiene información reservada.</li>
+                        </ol>
+                        <p><strong>Datos para notificaciones:</strong> <t t-out="c.lumak_representante"/> · <t t-out="c.street"/>,
+                            <t t-out="c.city"/> · Tel. <t t-out="c.phone"/> · <t t-out="c.email"/></p>
+                        <p>Atentamente,</p>
+                        <t t-call="lumak_secop.secop_firma"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- 2. Oferta económica: las líneas de la cotización son la lista de precios de SECOP II -->
+    <template id="report_oferta_economica">
+        <t>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="d" t-value="o._secop_docs()"/>
+                <t t-set="c" t-value="d['company']"/>
+                <t t-set="q" t-value="d['cotizacion']"/>
+                <t t-call="web.basic_layout">
+                    <div class="page" style="font-size: 10.5pt;">
+                        <t t-call="lumak_secop.secop_membrete"/>
+                        <t t-call="lumak_secop.secop_encabezado"/>
+                        <p><strong>Asunto: Oferta económica</strong><br/>
+                            Oferente: <t t-out="c.name"/> – NIT <t t-out="c.vat"/>. Régimen Simple de Tributación (responsabilidad 47), responsable de IVA.</p>
+                        <table class="table table-sm table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Ítem</th><th>Descripción</th><th>UNSPSC</th><th class="text-end">Cant.</th>
+                                    <th class="text-end">Valor unitario sin IVA</th><th>IVA</th><th class="text-end">Valor total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="q.order_line.filtered(lambda l: not l.display_type)" t-as="l">
+                                    <td t-out="l_index + 1"/>
+                                    <td t-out="l.name"/>
+                                    <td t-out="o.secop_unspsc or ''"/>
+                                    <td class="text-end" t-out="'%g' % l.product_uom_qty"/>
+                                    <td class="text-end"><span t-field="l.price_unit" t-options="{'widget': 'monetary', 'display_currency': q.currency_id}"/></td>
+                                    <td><t t-out="', '.join(l.tax_ids.mapped('name')) or 'Excluido'"/></td>
+                                    <td class="text-end"><span t-field="l.price_total"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table class="table table-sm" style="width: 50%; margin-left: auto;">
+                            <tr><td>Subtotal (base sin IVA)</td><td class="text-end"><span t-field="q.amount_untaxed"/></td></tr>
+                            <tr><td>IVA</td><td class="text-end"><span t-field="q.amount_tax"/></td></tr>
+                            <tr><td><strong>Valor total de la oferta</strong></td><td class="text-end"><strong><span t-field="q.amount_total"/></strong></td></tr>
+                        </table>
+                        <p>Valor total en letras: <strong t-out="d['valor_letras']"/>.</p>
+                        <ol style="font-size: 9.5pt;">
+                            <li>Los valores están en pesos colombianos e incluyen todos los costos directos e indirectos, impuestos, tasas y contribuciones.</li>
+                            <li>El valor total coincide con el registrado en la «Lista de precios» del SECOP II.</li>
+                            <li>Validez de la oferta: <t t-out="o.secop_validez_dias"/> días calendario desde el cierre.</li>
+                            <li>Plazo de ejecución: <t t-out="o.secop_plazo or 'el previsto en la invitación'"/>.</li>
+                        </ol>
+                        <t t-call="lumak_secop.secop_firma"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- 3. Certificación de aportes (Ley 789 de 2002, art. 50) -->
+    <template id="report_aportes">
+        <t>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="d" t-value="o._secop_docs()"/>
+                <t t-set="c" t-value="d['company']"/>
+                <t t-call="web.basic_layout">
+                    <div class="page" style="font-size: 11pt;">
+                        <t t-call="lumak_secop.secop_membrete"/>
+                        <h5 class="text-center">CERTIFICACIÓN DE PAGO DE APORTES AL SISTEMA DE SEGURIDAD SOCIAL INTEGRAL Y APORTES PARAFISCALES</h5>
+                        <p class="text-center" style="font-size: 9.5pt;">Artículo 50 de la Ley 789 de 2002 y artículo 41 de la Ley 80 de 1993, modificado por el artículo 23 de la Ley 1150 de 2007</p>
+                        <p>Proceso n.º <t t-out="o.secop_numero"/> – <t t-out="o.partner_id.name"/></p>
+                        <p>Yo, <t t-out="c.lumak_representante"/>, identificado con cédula de ciudadanía n.º <t t-out="c.lumak_representante_cc"/>,
+                            en mi calidad de representante legal de <t t-out="c.name"/>, NIT <t t-out="c.vat"/>, sociedad que no está obligada a
+                            tener revisor fiscal y no lo tiene, certifico bajo la gravedad del juramento que:</p>
+                        <t t-if="not c.lumak_tiene_empleados">
+                            <ol>
+                                <li>Desde <t t-if="d['desde_constitucion']">su constitución, el </t><t t-out="d['aportes_desde']"/>, y hasta la fecha
+                                    de esta certificación, <t t-out="c.name"/> no ha tenido trabajadores vinculados mediante contrato de trabajo ni personal a cargo.</li>
+                                <li>En consecuencia, en ese periodo no ha estado obligada a efectuar aportes al Sistema de Seguridad Social Integral
+                                    (salud, pensiones y riesgos laborales) ni aportes parafiscales (Cajas de Compensación Familiar, ICBF y SENA) por
+                                    concepto de trabajadores, y no tiene obligaciones pendientes por estos conceptos.</li>
+                                <li>Si durante la ejecución del contrato vincula personal, acreditará el pago de los aportes correspondientes para
+                                    cada pago, conforme al parágrafo 1 del artículo 41 de la Ley 80 de 1993.</li>
+                            </ol>
+                        </t>
+                        <t t-else="">
+                            <p>La sociedad ha pagado los aportes de sus empleados a los sistemas de salud, riesgos laborales y pensiones, y a las
+                                Cajas de Compensación Familiar, ICBF y SENA, desde <t t-if="d['desde_constitucion']">su constitución, el </t>
+                                <t t-out="d['aportes_desde']"/> y hasta la fecha de esta certificación. Está exonerada de los aportes a SENA e ICBF
+                                y de las cotizaciones a salud por los trabajadores que devengan menos de diez (10) SMMLV (Estatuto Tributario,
+                                artículos 114-1 y 903 parágrafo 3).</p>
+                        </t>
+                        <p>Se expide en <t t-out="c.city"/>, el <t t-out="d['fecha']"/>.</p>
+                        <t t-call="lumak_secop.secop_firma"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- 4. Compromiso anticorrupción -->
+    <template id="report_anticorrupcion">
+        <t>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="d" t-value="o._secop_docs()"/>
+                <t t-set="c" t-value="d['company']"/>
+                <t t-call="web.basic_layout">
+                    <div class="page" style="font-size: 11pt;">
+                        <t t-call="lumak_secop.secop_membrete"/>
+                        <h5 class="text-center">COMPROMISO ANTICORRUPCIÓN – PACTO DE TRANSPARENCIA</h5>
+                        <p>Proceso n.º <t t-out="o.secop_numero"/> – <t t-out="o.partner_id.name"/></p>
+                        <p><t t-out="c.lumak_representante"/>, C.C. <t t-out="c.lumak_representante_cc"/>, representante legal de
+                            <t t-out="c.name"/>, NIT <t t-out="c.vat"/>, se compromete en nombre del Proponente a:</p>
+                        <ol>
+                            <li>Cumplir estrictamente la ley aplicable e interpretar de buena fe las normas del proceso.</li>
+                            <li>No faltar a la verdad ni adulterar documentos o requisitos del proceso.</li>
+                            <li>Haber estudiado los documentos del proceso y presentar una oferta seria, sustentada en análisis propios.</li>
+                            <li>No celebrar acuerdos con quienes planean el proceso ni con otros proponentes para conocer o manipular información,
+                                direccionar el proceso, repartir adjudicaciones o fijar precios.</li>
+                            <li>Formular por escrito y por el SECOP II todas las preguntas, observaciones y solicitudes.</li>
+                            <li>Actuar con lealtad frente a la Entidad y los demás proponentes, sin acusaciones sin evidencia.</li>
+                            <li>No ofrecer ni entregar dádivas, pagos, empleos, contratos, gratificaciones ni atenciones a servidores públicos,
+                                contratistas o estructuradores de la Entidad ni a sus familiares, durante el proceso, la ejecución o la
+                                liquidación del contrato, ni en los dos (2) años siguientes a su suscripción.</li>
+                            <li>No contratar a personas con influencia política o mediática para presionar decisiones de la Entidad.</li>
+                            <li>Exigir a sus empleados, proveedores y subcontratistas un compromiso ético equivalente.</li>
+                            <li>Denunciar ante las autoridades, con copia a la Secretaría de Transparencia de la Presidencia de la República,
+                                todo acto de corrupción o solicitud indebida que conozca en relación con el proceso o el contrato.</li>
+                        </ol>
+                        <p>El incumplimiento de este compromiso faculta a la Entidad para adoptar las medidas legales pertinentes.</p>
+                        <p><t t-out="c.city"/>, <t t-out="d['fecha']"/></p>
+                        <t t-call="lumak_secop.secop_firma"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- 5. Declaración de inhabilidades, incompatibilidades y conflicto de intereses -->
+    <template id="report_inhabilidades">
+        <t>
+            <t t-foreach="docs" t-as="o">
+                <t t-set="d" t-value="o._secop_docs()"/>
+                <t t-set="c" t-value="d['company']"/>
+                <t t-call="web.basic_layout">
+                    <div class="page" style="font-size: 10.5pt;">
+                        <t t-call="lumak_secop.secop_membrete"/>
+                        <h5 class="text-center">DECLARACIÓN JURAMENTADA DE AUSENCIA DE INHABILIDADES, INCOMPATIBILIDADES, PROHIBICIONES Y CONFLICTO DE INTERESES</h5>
+                        <p>Proceso n.º <t t-out="o.secop_numero"/> – <t t-out="o.partner_id.name"/></p>
+                        <p>Yo, <t t-out="c.lumak_representante"/>, identificado con C.C. <t t-out="c.lumak_representante_cc"/>, en nombre propio y
+                            como representante legal de <t t-out="c.name"/>, NIT <t t-out="c.vat"/>, declaro bajo la gravedad del juramento, respecto
+                            de la sociedad, su representante legal y sus socios, que:</p>
+                        <ol>
+                            <li>No estamos incursos en las inhabilidades e incompatibilidades de los artículos 8 y 9 de la Ley 80 de 1993 y demás
+                                normas concordantes. En particular: no somos servidores públicos; no hemos dado lugar a declaratorias de
+                                caducidad; no hemos sido condenados a interdicción de derechos y funciones públicas ni sancionados con
+                                destitución; no nos hemos abstenido sin justa causa de suscribir un contrato adjudicado; no hemos sido
+                                declarados responsables judicialmente por delitos contra la administración pública ni por los de la Ley 1474
+                                de 2011; y no somos cónyuges, compañeros permanentes ni parientes, en los grados legales, de servidores de
+                                los niveles directivo, asesor o ejecutivo, de miembros de la junta o consejo directivo, ni de quienes ejercen
+                                control interno o fiscal en <t t-out="o.partner_id.name"/>.</li>
+                            <li>No estamos reportados en el Boletín de Responsables Fiscales de la Contraloría General de la República.</li>
+                            <li>No tenemos sanciones disciplinarias o penales vigentes que impliquen inhabilidad para contratar.</li>
+                        </ol>
+                        <p>Además declaro que el representante legal no está inscrito en el Registro de Deudores Alimentarios Morosos (Ley 2097
+                            de 2021, art. 6), y que no tenemos interés particular ni vínculo familiar, societario, laboral o contractual con los
+                            servidores o contratistas de <t t-out="o.partner_id.name"/> que intervienen en la estructuración, evaluación,
+                            adjudicación o supervisión de este proceso, ni participamos en los estudios previos o en la invitación.
+                            Informaremos de inmediato cualquier inhabilidad, incompatibilidad o conflicto de intereses sobreviniente (Ley 80 de 1993, art. 9).</p>
+                        <p><t t-out="c.city"/>, <t t-out="d['fecha']"/></p>
+                        <t t-call="lumak_secop.secop_firma"/>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- Carta con márgenes de documento: el formato «US Letter» de Odoo reserva espacio para su encabezado -->
+    <record id="paperformat_carta" model="report.paperformat">
+        <field name="name">Carta (Lumak)</field>
+        <field name="format">Letter</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">15</field>
+        <field name="margin_bottom">15</field>
+        <field name="margin_left">20</field>
+        <field name="margin_right">20</field>
+        <field name="header_spacing">0</field>
+        <field name="dpi">90</field>
+    </record>
+
+    <!-- Acciones de reporte: no se atan al menú Imprimir; las usa el botón «Preparar documentos de la oferta» -->
+    <record id="action_report_carta_presentacion" model="ir.actions.report">
+        <field name="name">Carta de presentación</field>
+        <field name="model">crm.lead</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lumak_secop.report_carta_presentacion</field>
+        <field name="paperformat_id" ref="paperformat_carta"/>
+    </record>
+    <record id="action_report_oferta_economica" model="ir.actions.report">
+        <field name="name">Oferta económica</field>
+        <field name="model">crm.lead</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lumak_secop.report_oferta_economica</field>
+        <field name="paperformat_id" ref="paperformat_carta"/>
+    </record>
+    <record id="action_report_aportes" model="ir.actions.report">
+        <field name="name">Certificación de aportes (art. 50)</field>
+        <field name="model">crm.lead</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lumak_secop.report_aportes</field>
+        <field name="paperformat_id" ref="paperformat_carta"/>
+    </record>
+    <record id="action_report_anticorrupcion" model="ir.actions.report">
+        <field name="name">Compromiso anticorrupción</field>
+        <field name="model">crm.lead</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lumak_secop.report_anticorrupcion</field>
+        <field name="paperformat_id" ref="paperformat_carta"/>
+    </record>
+    <record id="action_report_inhabilidades" model="ir.actions.report">
+        <field name="name">Declaración de inhabilidades y conflicto de intereses</field>
+        <field name="model">crm.lead</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lumak_secop.report_inhabilidades</field>
+        <field name="paperformat_id" ref="paperformat_carta"/>
+    </record>
+</odoo>

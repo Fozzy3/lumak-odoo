@@ -1,0 +1,392 @@
+$lumak-ink: #1F2A44;
+$lumak-ink-soft: #2C3A5C;
+$lumak-amber: #E8A33D;
+$lumak-paper: #F4F1EC;
+$lumak-line: #E6E0D6;
+$lumak-muted: #5F6776;
+$lumak-urgencia: (
+    critica: (#FBE9E6, #9F2F1E),
+    vencido: (#F1EEEA, #6B5E57),
+    pronto: (#FCF1DE, #8A5A0A),
+    tiempo: (#E6F2EC, #1F5E43),
+    sin_fecha: (#EFEFF1, #5F6776),
+    cerrado: (#EFEFF1, #5F6776),
+);
+
+// --- Marca en todo Odoo ------------------------------------------------------------------
+.o_web_client {
+    ::selection { background: rgba($lumak-amber, .35); color: inherit; }
+
+    // Botón principal ámbar con texto tinta: contraste ~7:1
+    .btn-primary {
+        --btn-color: #{$lumak-ink};
+        --btn-hover-color: #{$lumak-ink};
+        --btn-active-color: #{$lumak-ink};
+        --btn-disabled-color: #{$lumak-ink};
+        font-weight: 600;
+    }
+
+    :focus-visible { outline-color: $lumak-amber; }
+}
+
+// --- Tarjetas del tablero de procesos ------------------------------------------------------
+.o_lumak_secop_kanban {
+    .o_kanban_record {
+        border-color: $lumak-line;
+        border-radius: 10px;
+        transition: box-shadow 180ms ease-out, transform 180ms ease-out;
+
+        &:hover { box-shadow: 0 6px 18px rgba($lumak-ink, .10); }
+    }
+
+    .o_lumak_card_top {
+        display: flex;
+        align-items: center;
+        gap: .375rem;
+        margin-bottom: .5rem;
+        min-height: 1.5rem;
+    }
+
+    .o_lumak_modalidad .badge {
+        background: transparent !important;
+        color: $lumak-muted !important;
+        border: 1px solid $lumak-line;
+        font-weight: 500;
+    }
+
+    .o_lumak_cierre .badge { font-weight: 600; }
+
+    .o_lumak_card_title span {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-weight: 600;
+        font-size: 1rem;
+        line-height: 1.3;
+        color: $lumak-ink;
+    }
+
+    .o_lumak_card_entity {
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+        margin-top: .35rem;
+        color: $lumak-muted;
+        font-size: .85rem;
+        min-width: 0;
+    }
+
+    .o_lumak_card_money {
+        display: flex;
+        align-items: baseline;
+        gap: .5rem;
+        margin-top: .6rem;
+        min-width: 0;
+    }
+
+    .o_lumak_money {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: $lumak-ink;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .o_lumak_ref {
+        margin-left: auto;
+        color: $lumak-muted;
+        font-size: .78rem;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .o_lumak_card_flags { margin-top: .5rem; }
+}
+
+// --- Ficha del proceso ---------------------------------------------------------------------
+.o_lumak_form_status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .4rem;
+    margin-bottom: .75rem;
+
+    .badge { font-size: .8rem; font-weight: 600; }
+}
+
+// --- Tablero de Licitaciones ---------------------------------------------------------------
+.o_lumak_dashboard {
+    background: $lumak-paper;
+    overflow: auto;
+    color: $lumak-ink;
+
+    .o_lumak_sheet {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 2rem 2rem 3rem;
+    }
+
+    .o_lumak_head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+
+        h1 {
+            margin: 0;
+            font-size: 1.9rem;
+            font-weight: 700;
+            letter-spacing: -.02em;
+        }
+    }
+
+    .o_lumak_date {
+        margin: .25rem 0 0;
+        color: $lumak-muted;
+        &::first-letter { text-transform: uppercase; }
+    }
+
+    .o_lumak_actions {
+        display: flex;
+        gap: .5rem;
+    }
+
+    // Cifras en una sola franja, separadas por líneas finas (no tarjetas sueltas)
+    .o_lumak_stats {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        background: #fff;
+        border: 1px solid $lumak-line;
+        border-radius: 12px;
+        box-shadow: 0 1px 2px rgba($lumak-ink, .04);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .o_lumak_stat {
+        display: flex;
+        flex-direction: column;
+        gap: .2rem;
+        padding: 1.1rem 1.35rem;
+        text-align: left;
+        background: none;
+        border: 0;
+        border-left: 1px solid $lumak-line;
+        color: inherit;
+
+        &:first-child { border-left: 0; }
+    }
+
+    button.o_lumak_stat {
+        cursor: pointer;
+        transition: background-color 160ms ease-out;
+        &:hover { background: rgba($lumak-amber, .08); }
+        &:focus-visible { outline: 2px solid $lumak-amber; outline-offset: -2px; }
+    }
+
+    .o_lumak_stat_value {
+        font-size: 1.85rem;
+        font-weight: 700;
+        line-height: 1.1;
+        font-variant-numeric: tabular-nums;
+
+        small { font-size: .95rem; font-weight: 500; color: $lumak-muted; }
+    }
+
+    .o_lumak_stat_label { color: $lumak-muted; font-size: .88rem; }
+
+    .o_lumak_stat_hot .o_lumak_stat_value { color: #8A5A0A; }
+
+    .o_lumak_body {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .o_lumak_main { display: grid; gap: 1.5rem; }
+
+    .o_lumak_upcoming, .o_lumak_side {
+        background: #fff;
+        border: 1px solid $lumak-line;
+        border-radius: 12px;
+        box-shadow: 0 1px 2px rgba($lumak-ink, .04);
+        padding: 1.25rem 1.35rem;
+    }
+
+    .o_lumak_side > section + section {
+        margin-top: 1.25rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid $lumak-line;
+    }
+
+    h2 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin: 0 0 .85rem;
+    }
+
+    .o_lumak_rows {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+
+        li + li { border-top: 1px solid $lumak-line; }
+    }
+
+    .o_lumak_row {
+        display: grid;
+        grid-template-columns: 12.75rem minmax(0, 1fr) auto;
+        align-items: center;
+        gap: .9rem;
+        width: 100%;
+        padding: .75rem .5rem;
+        background: none;
+        border: 0;
+        border-radius: 8px;
+        text-align: left;
+        color: inherit;
+        cursor: pointer;
+        transition: background-color 160ms ease-out;
+
+        &:hover { background: $lumak-paper; }
+        &:focus-visible { outline: 2px solid $lumak-amber; outline-offset: 0; }
+    }
+
+    .o_lumak_row_plain { grid-template-columns: minmax(0, 1fr) auto; }
+
+    .o_lumak_row_main { display: flex; flex-direction: column; min-width: 0; }
+
+    .o_lumak_row_title {
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .o_lumak_row_meta {
+        color: $lumak-muted;
+        font-size: .85rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .o_lumak_row_money { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    .o_lumak_chip {
+        justify-self: start;
+        padding: .25rem .6rem;
+        border-radius: 999px;
+        font-size: .78rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    @each $urgencia, $colores in $lumak-urgencia {
+        .o_lumak_chip_#{$urgencia} {
+            background: nth($colores, 1);
+            color: nth($colores, 2);
+        }
+    }
+
+    .o_lumak_h2_link {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        .btn-link { padding: 0; font-size: .85rem; font-weight: 600; color: $lumak-ink-soft; }
+    }
+
+    // Filas cortas de la columna lateral: fecha o estado + texto
+    .o_lumak_mini {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: .15rem;
+    }
+
+    .o_lumak_mini_row {
+        display: grid;
+        grid-template-columns: 4.25rem minmax(0, 1fr);
+        align-items: center;
+        gap: .6rem;
+        width: 100%;
+        padding: .35rem .25rem;
+        background: none;
+        border: 0;
+        border-radius: 6px;
+        text-align: left;
+        color: inherit;
+        font-size: .88rem;
+        cursor: pointer;
+        &:hover { background: $lumak-paper; }
+        &:focus-visible { outline: 2px solid $lumak-amber; outline-offset: 0; }
+        .o_lumak_chip { justify-self: stretch; text-align: center; }
+    }
+
+    .o_lumak_mini_row_end {
+        grid-template-columns: minmax(0, 1fr) auto;
+        .o_lumak_chip { justify-self: end; }
+    }
+
+    .o_lumak_mini_text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .o_lumak_bars {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: .55rem;
+
+        li {
+            display: grid;
+            grid-template-columns: 8.5rem minmax(0, 1fr) 1.5rem;
+            align-items: center;
+            gap: .6rem;
+            font-size: .9rem;
+        }
+    }
+
+    .o_lumak_bar {
+        height: .5rem;
+        background: $lumak-paper;
+        border-radius: 999px;
+        overflow: hidden;
+
+        span {
+            display: block;
+            height: 100%;
+            background: $lumak-ink-soft;
+            border-radius: 999px;
+        }
+    }
+
+    .o_lumak_bar_value { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+
+    .o_lumak_insight {
+        margin: 0;
+        line-height: 1.5;
+        strong { font-size: 1.35rem; }
+    }
+
+    .o_lumak_muted, .o_lumak_empty { color: $lumak-muted; line-height: 1.5; margin: 0; }
+    .o_lumak_empty p + p { margin-top: .4rem; }
+
+    @media (max-width: 1199.98px) and (min-width: 992px) {
+        .o_lumak_stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .o_lumak_stat:nth-child(4) { border-left: 0; }
+        .o_lumak_stat:nth-child(n+4) { border-top: 1px solid $lumak-line; }
+    }
+
+    @media (max-width: 991.98px) {
+        .o_lumak_sheet { padding: 1.25rem 1rem 2rem; }
+        .o_lumak_stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .o_lumak_stat:nth-child(odd) { border-left: 0; }
+        .o_lumak_stat:nth-child(n+3) { border-top: 1px solid $lumak-line; }
+        .o_lumak_body { grid-template-columns: minmax(0, 1fr); }
+        .o_lumak_row { grid-template-columns: minmax(0, 1fr) auto; }
+        .o_lumak_chip { grid-column: 1 / -1; }
+    }
+}

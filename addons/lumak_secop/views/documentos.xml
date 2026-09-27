@@ -1,0 +1,87 @@
+<odoo>
+    <!-- Kit de la empresa -->
+    <record id="lumak_documento_list" model="ir.ui.view">
+        <field name="name">lumak.documento.list</field>
+        <field name="model">lumak.documento</field>
+        <field name="arch" type="xml">
+            <list string="Kit de la empresa" editable="bottom" decoration-muted="not en_oferta">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="estado" widget="badge" decoration-danger="estado in ('falta', 'vencido')"
+                       decoration-warning="estado == 'por_vencer'" decoration-success="estado == 'vigente'"/>
+                <field name="archivo" filename="archivo_nombre" widget="binary"/>
+                <field name="archivo_nombre" column_invisible="1"/>
+                <field name="fecha_expedicion"/>
+                <field name="vence" readonly="1"/>
+                <field name="vigencia_dias" optional="hide"/>
+                <field name="emisor" optional="show"/>
+                <field name="en_oferta" optional="hide"/>
+                <field name="nota" optional="hide"/>
+                <field name="url" column_invisible="1"/>
+                <button name="action_abrir_url" type="object" string="Sacarlo" icon="fa-external-link" invisible="not url"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_lumak_documento" model="ir.actions.act_window">
+        <field name="name">Kit de la empresa</field>
+        <field name="res_model">lumak.documento</field>
+        <field name="view_mode">list</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aquí viven los certificados que van en cada oferta.</p>
+            <p>Sube el PDF y la fecha de expedición: Odoo avisa cuándo vence y los junta al preparar cada oferta.</p>
+        </field>
+    </record>
+    <menuitem id="menu_secop_kit" name="Kit de la empresa" parent="menu_lumak_root" action="action_lumak_documento" sequence="2"/>
+
+    <!-- Atajo a los datos que usan los documentos (representante, cédula, dirección) -->
+    <record id="action_lumak_datos_empresa" model="ir.actions.server">
+        <field name="name">Datos de la empresa</field>
+        <field name="model_id" ref="base.model_res_company"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_lumak_datos_empresa()</field>
+    </record>
+    <menuitem id="menu_lumak_empresa" name="Datos de la empresa" parent="menu_lumak_root" action="action_lumak_datos_empresa" sequence="5"/>
+
+    <!-- Datos del representante legal para los documentos -->
+    <record id="res_company_form_lumak" model="ir.ui.view">
+        <field name="name">res.company.form.lumak</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <page name="general_info" position="after">
+                <page string="Ofertas SECOP" name="lumak_secop">
+                    <group>
+                        <group string="Representante legal">
+                            <field name="lumak_representante"/>
+                            <field name="lumak_representante_cc"/>
+                            <field name="lumak_representante_cc_expedida"/>
+                        </group>
+                        <group string="Sociedad">
+                            <field name="lumak_fecha_constitucion"/>
+                            <field name="lumak_tiene_empleados"/>
+                        </group>
+                    </group>
+                </page>
+            </page>
+        </field>
+    </record>
+
+    <!-- En la ficha del proceso: el botón que arma la carpeta de la oferta -->
+    <record id="crm_lead_view_form_secop_docs" model="ir.ui.view">
+        <field name="name">crm.lead.form.secop.docs</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="lumak_secop.crm_lead_view_form_secop"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_secop_preparar_oferta" type="object" string="Preparar documentos de la oferta"
+                        class="btn-primary" invisible="not secop_es_licitacion or won_status != 'pending'"/>
+            </xpath>
+            <field name="secop_url" position="after">
+                <field name="secop_plazo"/>
+                <field name="secop_validez_dias"/>
+                <field name="secop_adendas"/>
+            </field>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="lumak_secop.Dashboard">
+        <div class="o_action o_lumak_dashboard">
+            <t t-set="d" t-value="state.data"/>
+            <div class="o_lumak_sheet">
+                <header class="o_lumak_head">
+                    <div>
+                        <h1>Lumak</h1>
+                        <p class="o_lumak_date" t-esc="hoy"/>
+                    </div>
+                    <div class="o_lumak_actions">
+                        <button class="btn btn-secondary" t-on-click="() => this.openProcesos()">Ver procesos</button>
+                        <button class="btn btn-primary" t-on-click="openImport">
+                            <i class="fa fa-cloud-download me-2" aria-hidden="true"/>Importar desde SECOP
+                        </button>
+                    </div>
+                </header>
+
+                <section class="o_lumak_stats" aria-label="Resumen">
+                    <button class="o_lumak_stat" t-on-click="() => this.openProcesos()">
+                        <span class="o_lumak_stat_value" t-esc="d.activos"/>
+                        <span class="o_lumak_stat_label">procesos activos</span>
+                    </button>
+                    <button class="o_lumak_stat" t-att-class="{'o_lumak_stat_hot': d.cierran_semana}"
+                            t-on-click="() => this.openProcesos('semana')">
+                        <span class="o_lumak_stat_value" t-esc="d.cierran_semana"/>
+                        <span class="o_lumak_stat_label">cierran esta semana</span>
+                    </button>
+                    <div class="o_lumak_stat">
+                        <span class="o_lumak_stat_value" t-esc="d.valor_en_juego"/>
+                        <span class="o_lumak_stat_label">en juego (presupuestos activos)</span>
+                    </div>
+                    <div class="o_lumak_stat">
+                        <span class="o_lumak_stat_value"><t t-esc="d.ganados"/> <small>de</small> <t t-esc="d.ganados + d.perdidos"/></span>
+                        <span class="o_lumak_stat_label" t-if="d.tasa !== null">cerrados que ganamos (<t t-esc="d.tasa"/> %)</span>
+                        <span class="o_lumak_stat_label" t-else="">todavía sin procesos cerrados</span>
+                    </div>
+                    <button class="o_lumak_stat" t-att-class="{'o_lumak_stat_hot': d.facturas_vencidas}" t-on-click="openFacturas">
+                        <span class="o_lumak_stat_value" t-esc="d.por_cobrar"/>
+                        <span class="o_lumak_stat_label">por cobrar<t t-if="d.facturas_vencidas"> (<t t-esc="d.facturas_vencidas"/> vencidas)</t></span>
+                    </button>
+                    <button class="o_lumak_stat" t-att-class="{'o_lumak_stat_hot': d.kit_ok &lt; d.kit_total}" t-on-click="openKit">
+                        <span class="o_lumak_stat_value"><t t-esc="d.kit_ok"/> <small>de</small> <t t-esc="d.kit_total"/></span>
+                        <span class="o_lumak_stat_label">documentos del kit al día</span>
+                    </button>
+                </section>
+
+                <div class="o_lumak_body">
+                    <div class="o_lumak_main">
+                    <section class="o_lumak_upcoming">
+                        <h2>Próximos cierres</h2>
+                        <ul t-if="d.proximos.length" class="o_lumak_rows">
+                            <li t-foreach="d.proximos" t-as="p" t-key="p.id">
+                                <button class="o_lumak_row" t-on-click="() => this.openLead(p.id)">
+                                    <span class="o_lumak_chip" t-att-class="'o_lumak_chip_' + p.urgencia" t-esc="p.cierre_label"/>
+                                    <span class="o_lumak_row_main">
+                                        <span class="o_lumak_row_title" t-esc="p.nombre"/>
+                                        <span class="o_lumak_row_meta"><t t-esc="p.entidad"/><t t-if="p.modalidad"> · <t t-esc="p.modalidad"/></t></span>
+                                    </span>
+                                    <span class="o_lumak_row_money" t-esc="p.presupuesto"/>
+                                </button>
+                            </li>
+                        </ul>
+                        <div t-else="" class="o_lumak_empty">
+                            <p>Ningún proceso activo tiene fecha de cierre.</p>
+                            <p>Importa uno desde SECOP, o abre los que tienes y ponles la fecha de cierre para verlos aquí en orden.</p>
+                        </div>
+                    </section>
+
+                    <section class="o_lumak_upcoming">
+                        <h2>Contratos en ejecución</h2>
+                        <ul t-if="d.contratos.length" class="o_lumak_rows">
+                            <li t-foreach="d.contratos" t-as="c" t-key="c.id">
+                                <button class="o_lumak_row o_lumak_row_plain" t-on-click="() => this.openContrato(c.id)">
+                                    <span class="o_lumak_row_main">
+                                        <span class="o_lumak_row_title" t-esc="c.nombre"/>
+                                        <span class="o_lumak_row_meta"><t t-esc="c.entidad"/><t t-if="c.hito"> · próximo hito: <t t-esc="c.hito"/></t></span>
+                                    </span>
+                                    <span class="o_lumak_row_meta" t-esc="c.hito_fecha"/>
+                                </button>
+                            </li>
+                        </ul>
+                        <p t-else="" class="o_lumak_muted">Cuando un proceso pase a «Adjudicado» o un cliente firme su cotización, aquí aparece su proyecto con el próximo hito de pago.</p>
+                    </section>
+                    </div>
+
+                    <aside class="o_lumak_side">
+                        <section>
+                            <h2 class="o_lumak_h2_link">Fechas de la empresa
+                                <button class="btn btn-link" t-on-click="openCalendario">Calendario</button></h2>
+                            <ul t-if="d.obligaciones.length" class="o_lumak_mini">
+                                <li t-foreach="d.obligaciones" t-as="o" t-key="o.id">
+                                    <button class="o_lumak_mini_row" t-on-click="() => this.openEvento(o.id)">
+                                        <span class="o_lumak_chip" t-att-class="'o_lumak_chip_' + (o.dias &lt;= 2 ? 'critica' : o.dias &lt;= 7 ? 'pronto' : 'sin_fecha')" t-esc="o.fecha"/>
+                                        <span class="o_lumak_mini_text" t-esc="o.nombre" t-att-title="o.nombre"/>
+                                    </button>
+                                </li>
+                            </ul>
+                            <p t-else="" class="o_lumak_muted">Sin fechas legales próximas.</p>
+                        </section>
+                        <section>
+                            <h2 class="o_lumak_h2_link">Kit de la empresa
+                                <button class="btn btn-link" t-on-click="openKit">Abrir</button></h2>
+                            <ul t-if="d.kit_pendientes.length" class="o_lumak_mini">
+                                <li t-foreach="d.kit_pendientes" t-as="k" t-key="k.id">
+                                    <button class="o_lumak_mini_row o_lumak_mini_row_end" t-on-click="openKit">
+                                        <span class="o_lumak_mini_text" t-esc="k.nombre" t-att-title="k.nombre"/>
+                                        <span class="o_lumak_chip" t-att-class="'o_lumak_chip_' + (k.estado === 'por_vencer' ? 'pronto' : 'vencido')" t-esc="k.etiqueta"/>
+                                    </button>
+                                </li>
+                            </ul>
+                            <p t-else="" class="o_lumak_muted">Todo el kit está al día.</p>
+                        </section>
+                        <section>
+                            <h2>Por etapa</h2>
+                            <ul class="o_lumak_bars">
+                                <li t-foreach="d.etapas" t-as="e" t-key="e.id">
+                                    <span class="o_lumak_bar_label" t-esc="e.nombre"/>
+                                    <span class="o_lumak_bar" aria-hidden="true"><span t-att-style="'width:' + (100 * e.total / maxEtapa) + '%'"/></span>
+                                    <span class="o_lumak_bar_value" t-esc="e.total"/>
+                                </li>
+                            </ul>
+                        </section>
+                        <section>
+                            <h2>Precio para ganar</h2>
+                            <t t-if="d.descuento_ganador !== null">
+                                <p class="o_lumak_insight"><strong><t t-esc="d.descuento_ganador"/> %</strong> por debajo del presupuesto ofertaron, en promedio, los ganadores
+                                    (<t t-esc="d.descuento_n"/> <t t-esc="d.descuento_n === 1 ? 'proceso' : 'procesos'"/>).</p>
+                            </t>
+                            <p t-else="" class="o_lumak_muted">Cuando pierdas un proceso, anota el precio ganador en su pestaña SECOP. Aquí verás cuánto por debajo del presupuesto se gana.</p>
+                        </section>
+                    </aside>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
