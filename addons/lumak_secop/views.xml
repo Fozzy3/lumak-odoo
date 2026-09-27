@@ -1,0 +1,51 @@
+<odoo>
+    <record id="view_secop_import_form" model="ir.ui.view">
+        <field name="name">lumak.secop.import.form</field>
+        <field name="model">lumak.secop.import</field>
+        <field name="arch" type="xml">
+            <form string="Importar desde SECOP">
+                <p>Pega el enlace del proceso en SECOP II, su ID (CO1.REQ…) o su referencia.
+                    Los datos abiertos llegan con cerca de un día de retraso.</p>
+                <group>
+                    <field name="referencia" placeholder="https://community.secop.gov.co/...noticeUID=CO1.NTC..."/>
+                </group>
+                <footer>
+                    <button name="action_import" string="Importar" type="object" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_secop_import" model="ir.actions.act_window">
+        <field name="name">Importar desde SECOP</field>
+        <field name="res_model">lumak.secop.import</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Acción de servidor: el equipo lo crea scripts/crm_secop.py, así que se busca al abrir el menú -->
+    <record id="action_secop_pipeline" model="ir.actions.server">
+        <field name="name">Licitaciones SECOP</field>
+        <field name="model_id" ref="crm.model_crm_lead"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_secop_pipeline()</field>
+    </record>
+
+    <menuitem id="menu_secop_root" name="Licitaciones" parent="crm.crm_menu_root" sequence="2"/>
+    <menuitem id="menu_secop_pipeline" name="Procesos SECOP" parent="menu_secop_root"
+              action="action_secop_pipeline" sequence="1"/>
+    <menuitem id="menu_secop_import" name="Importar desde SECOP" parent="menu_secop_root"
+              action="action_secop_import" sequence="2"/>
+
+    <record id="crm_lead_view_form_secop" model="ir.ui.view">
+        <field name="name">crm.lead.form.secop</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="arch" type="xml">
+            <field name="tag_ids" position="after">
+                <field name="secop_id" invisible="not secop_id" readonly="1"/>
+            </field>
+        </field>
+    </record>
+</odoo>

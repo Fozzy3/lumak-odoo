@@ -11,5 +11,11 @@ Odoo 19 Community en Docker para aprender y simular la operación de LUMAK SOLUT
 - Todo registro simulado lleva la etiqueta `SIM` (categoría de contacto o etiqueta de CRM), para poder filtrarlo o borrarlo después.
 - Entidades públicas colombianas reales como clientes simulados están bien; personas naturales, inventadas.
 - Antes de borrar o archivar algo, preguntar.
-- Odoo se deja como viene: el flujo de licitaciones SECOP en el CRM por etapas se arma después, cuando Carlos lo pida.
 - Responder en español sencillo.
+
+## CRM de licitaciones SECOP
+
+- Configuración en `scripts/crm_secop.py` (idempotente, IDs externos `lumak.*`). Si se cambia algo del diseño, cambiarlo en el script y volver a correrlo; no crear a mano lo que el script ya crea.
+- Diseño y fuentes: `docs/licitaciones-secop.md`. Un proceso = una oportunidad del equipo «Licitaciones SECOP»; lo ganado se ejecuta con la plantilla de proyecto «Plantilla – Contrato SECOP».
+- Las propiedades de fecha y hora se guardan en UTC (Bogotá = UTC−5). Los planes de actividades cuentan días calendario, no hábiles.
+- Módulo `addons/lumak_secop` (TDD: pruebas en `tests/`, correrlas en una base aparte `lumak_test`): importa desde el dataset `p6dx-8zbt` de datos.gov.co y agenda los planes por etapa usando la «Fecha de cierre esperada» (`date_deadline`). Tras cambiar Python: `-u lumak_secop` y `docker compose restart odoo`.
