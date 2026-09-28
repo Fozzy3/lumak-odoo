@@ -81,3 +81,13 @@ class TestContratos(TransactionCase):
         lead.stage_id = self.adjudicado
         self.assertFalse(lead.order_ids)
         self.assertIn("cotización", lead.message_ids[0].body)
+
+    def test_price_analysis_from_the_history_shows_in_the_secop_tab(self):
+        # la base estadística (estadistica/) calcula el análisis y lo escribe por la API; aquí solo se guarda y se ve
+        lead = self._lead()
+        lead.write({"secop_precio_sugerido": 41_600_000, "secop_prob_ganar": 0.36,
+                    "secop_analisis_precio": "Basado en 188 procesos comparables del nicho."})
+        self.assertEqual(lead.secop_prob_ganar, 0.36)
+        arch = self.env["crm.lead"].get_view(view_type="form")["arch"]
+        for campo in ("secop_precio_sugerido", "secop_prob_ganar", "secop_analisis_precio", "secop_analisis_fecha"):
+            self.assertIn(campo, arch)

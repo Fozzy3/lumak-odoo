@@ -22,6 +22,12 @@ class CrmLead(models.Model):
                                            compute="_compute_secop_valor_ofertado",
                                            help="Total con IVA de la cotización: es la lista de precios de SECOP II.")
     secop_proyecto_id = fields.Many2one("project.project", "Proyecto del contrato", compute="_compute_secop_proyecto")
+    # Los escribe el monitor diario de la base estadística (estadistica/secop_estadistica/monitor.py) desde el histórico
+    secop_precio_sugerido = fields.Monetary("Precio sugerido", currency_field="company_currency", copy=False,
+                                            help="El que da la mayor utilidad esperada según el histórico y el costo estimado.")
+    secop_prob_ganar = fields.Float("Probabilidad de ganar", copy=False)
+    secop_analisis_precio = fields.Text("Análisis de precio", copy=False)
+    secop_analisis_fecha = fields.Datetime("Analizado el", copy=False)
 
     def _secop_cotizacion(self):
         """La cotización vigente: la última que no esté cancelada."""

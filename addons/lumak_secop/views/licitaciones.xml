@@ -204,6 +204,18 @@
                             <field name="secop_precio_ganador"/>
                         </group>
                     </group>
+                    <group string="Precio para ganar (según el histórico)">
+                        <group>
+                            <!-- Sin costo estimado no hay sugerido: se oculta en vez de mostrar $0 y 0 % -->
+                            <field name="secop_precio_sugerido" invisible="not secop_precio_sugerido"/>
+                            <field name="secop_prob_ganar" widget="percentage" invisible="not secop_precio_sugerido"/>
+                        </group>
+                        <group>
+                            <field name="secop_analisis_fecha" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="secop_analisis_precio" readonly="1" nolabel="1"
+                           placeholder="El monitor diario escribe aquí el análisis: probabilidad de ganar por precio, utilidad con tu costo estimado y competidores probables."/>
                 </page>
             </xpath>
         </field>
