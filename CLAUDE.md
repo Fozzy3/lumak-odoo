@@ -29,6 +29,13 @@ Odoo 19 Community en Docker para aprender y simular la operación de LUMAK SOLUT
 - TDD: pruebas en `tests/`, en una base aparte `lumak_test`. Tras cambiar Python, XML o SCSS: `-u lumak_secop` y `docker compose restart odoo`.
 - Cambios de datos en la base real: migración en `migrations/<versión>/`. Probarla antes en una copia (`createdb -T lumak lumak_copy`): los IDs sin `noupdate` que falten en el XML se borran al actualizar.
 
+## Base estadística `estadistica/`
+
+- Histórico de mínima cuantía de SECOP II (software y TIC) con cada oferta, en DuckDB (`estadistica/datos/secop.duckdb`, fuera de git). Guía completa en `estadistica/README.md`.
+- Se actualiza cada lunes con el temporizador de `estadistica/systemd/`. Tras una carga interrumpida: `uv run python -m secop_estadistica completar`.
+- TDD con `uv run pytest`. DuckDB admite un solo proceso escribiendo: mientras carga, leer una copia del archivo.
+- Las ofertas vienen repetidas una vez por renglón de la lista de precios: se agrupan en el servidor. Se unen al proceso por el portafolio (`CO1.BDOS…`).
+
 ## Diseño y gotchas
 
 - En las vistas, el color se reserva para la urgencia: rojo hoy/mañana o vencido, ámbar pronto, verde con tiempo. La modalidad va en gris. Colores Lumak: tinta #1F2A44, ámbar #E8A33D.

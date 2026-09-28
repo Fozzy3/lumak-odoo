@@ -1,0 +1,13 @@
+[project]
+name = "secop-estadistica"
+version = "0.1.0"
+description = "Base estadística del histórico de mínima cuantía de SECOP II (software y TIC) para Lumak"
+requires-python = ">=3.12"
+dependencies = ["duckdb>=1.1"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

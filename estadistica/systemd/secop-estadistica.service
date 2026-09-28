@@ -1,0 +1,10 @@
+[Unit]
+Description=Base estadística de SECOP (mínima cuantía de software): actualización e informe semanal
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Documents/repos/odoo/estadistica
+ExecStart=%h/.local/bin/uv run --quiet python -m secop_estadistica actualizar
+ExecStartPost=%h/.local/bin/uv run --quiet python -m secop_estadistica reporte

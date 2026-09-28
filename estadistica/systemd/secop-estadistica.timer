@@ -1,0 +1,10 @@
+[Unit]
+Description=Actualiza la base estadística de SECOP cada lunes
+
+[Timer]
+OnCalendar=Mon *-*-* 06:00:00
+# Si el equipo estaba apagado el lunes, corre al prenderlo
+Persistent=true
+
+[Install]
+WantedBy=timers.target
