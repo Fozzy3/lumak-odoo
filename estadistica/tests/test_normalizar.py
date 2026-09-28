@@ -29,6 +29,11 @@ def test_niche_is_software_not_hardware():
     assert not clasificar("Adquisición de certificados de firma digital y soporte de la plataforma", "V1.43233200", "Compraventa")[0]
     assert not clasificar("Renovación de licencias y soporte del software antivirus", "V1.43233200", "Prestación de servicios")[0]
     assert clasificar("Desarrollo de un aplicativo con licencia de uso a perpetuidad", "V1.81111500", "Prestación de servicios")[0]
+    # Casos reales que se colaban: nombran un aplicativo o un sitio web, pero compran tokens o certificados
+    assert not clasificar("Adquirir tokens para uso en el aplicativo externo SIIF y de firma digital para los funcionarios",
+                          "V1.43233200", "Compraventa")[0]
+    assert not clasificar("Adquirir certificado SSL con servicio de soporte técnico para el sitio web de la alcaldía",
+                          "V1.81112000", "Prestación de servicios")[0]
 
 
 # Fila real (recortada) de p6dx-8zbt y de wi7w-2nvm

@@ -73,8 +73,10 @@ HARDWARE = (r"materiales|elementos|equipos de|kit\b|suministro de|\bepp\b|ferret
 
 
 # Reventa de licencias, certificados y suscripciones: no es software a la medida aunque diga «soporte de la plataforma»
-REVENTA = (r"licencia|antivirus|firma digital|firma electronica|certificado digital|certificados digitales|office 365|"
-           r"microsoft|google workspace|adobe|autocad|arcgis|suscripci|renovacion de|\btoken")
+REVENTA = (r"licencia|antivirus|firma digital|firma electronica|certificado digital|certificados digitales|\bssl\b|"
+           r"\btokens?\b|criptografic|office 365|microsoft|google workspace|adobe|autocad|arcgis|suscripci|renovacion de")
+# Solo el desarrollo explícito rescata un proceso de reventa («para uso en el aplicativo SIIF» no es desarrollo)
+DESARROLLO = r"desarroll|a la medida|construccion de (un |una |el |la )?(software|sistema|aplicativo|plataforma)"
 
 
 def segmento(codigo):
@@ -94,7 +96,7 @@ def clasificar(texto, codigo, tipo_contrato):
     nicho = bool(NUCLEO & set(etiquetas))
     if re.search(HARDWARE, t) and not {"ia_chatbot", "app_dev", "web", "soporte_sw"} & set(etiquetas):
         nicho = False
-    if re.search(REVENTA, t) and not {"ia_chatbot", "app_dev"} & set(etiquetas):
+    if re.search(REVENTA, t) and not re.search(DESARROLLO, t):
         nicho = False
     if segmento(codigo) not in ("43", "80", "81", "82", "84", ""):
         nicho = False

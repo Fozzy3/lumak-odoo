@@ -48,9 +48,9 @@ def test_update_loads_processes_grouped_offers_and_contracts():
     base = Base(duckdb.connect(":memory:"))
     datos = DatosFalsos()
     assert actualizar(base, "2025-01-01", fetch=datos) == (1, 2, 1)
-    # las ofertas se piden agrupadas (sin las 92 copias) y a los dos datasets de ofertas
+    # las ofertas se piden agrupadas (sin las 92 copias); el histórico solo se consulta para lo que no apareció
     pedidos_ofertas = [p for d, p in datos.pedidos if d in (OFERTAS, OFERTAS_HISTORICO)]
-    assert {d for d, _ in datos.pedidos if d in (OFERTAS, OFERTAS_HISTORICO)} == {OFERTAS, OFERTAS_HISTORICO}
+    assert {d for d, _ in datos.pedidos if d in (OFERTAS, OFERTAS_HISTORICO)} == {OFERTAS}
     assert all("count(*)" in p["$select"] and "$group" in p and "CO1.BDOS.7857804" in p["$where"] for p in pedidos_ofertas)
     fila = base.con.sql("select n_ofertas, ganador_nombre, puesto_ganador, gano_el_mas_barato from v_procesos").fetchone()
     assert fila == (2, "HDC", 2, False)
@@ -119,3 +119,26 @@ def test_reclassify_updates_the_niche_of_stored_processes():
     base.guardar_procesos([{**certificados, "nicho": True}])  # como quedó con el clasificador anterior
     assert reclasificar(base) == 1
     assert base.con.sql("select nicho from procesos").fetchone() == (False,)
+
+
+def test_small_batches_and_history_only_for_what_is_missing():
+    from secop_estadistica.cargar import cargar_ofertas
+
+    pedidos = []
+
+    def fetch(dataset, params):
+        ids = [p.strip(" '") for p in params["$where"].split("(")[1].rstrip(")").split(",")]
+        pedidos.append((dataset, ids))
+        if params["$offset"]:
+            return []
+        # el dataset actual solo tiene las ofertas recientes; las viejas están en el histórico
+        tiene = [i for i in ids if (i.startswith("NUEVO") if dataset == OFERTAS else i.startswith("VIEJO"))]
+        return [{"identificador_de_la_oferta": f"RPL.{i}", "id_del_proceso_de_compra": i, "nit_del_proveedor": "1",
+                 "nombre_proveedor": "X", "valor_de_la_oferta": "1", "fecha_de_registro": "2025-01-01T00:00:00.000",
+                 "invitacion_directa": "No", "filas": "1"} for i in tiene]
+
+    portafolios = [f"NUEVO.{i}" for i in range(30)] + ["VIEJO.1", "VIEJO.2"]
+    total, fallidos = cargar_ofertas(Base(duckdb.connect(":memory:")), portafolios, fetch=fetch)
+    assert (total, fallidos) == (32, [])
+    assert max(len(ids) for _, ids in pedidos) <= 25, "SECOP responde vacío si el lote es grande"
+    assert sorted(i for d, ids in pedidos if d == OFERTAS_HISTORICO for i in ids) == ["VIEJO.1", "VIEJO.2"]

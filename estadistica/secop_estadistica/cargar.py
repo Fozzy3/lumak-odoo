@@ -46,25 +46,21 @@ def cargar_procesos(base, desde, fetch=http):
     return total, sorted(portafolios)
 
 
-def _pedir_ofertas(grupo, fetch):
+def _pedir_ofertas(dataset, grupo, fetch):
     lista = ", ".join(f"'{p}'" for p in grupo)
-    filas = []
-    for dataset in (OFERTAS, OFERTAS_HISTORICO):
-        params = {"$select": f"{CAMPOS_OFERTA}, count(*) as filas", "$group": CAMPOS_OFERTA,
-                  "$where": f"id_del_proceso_de_compra in ({lista})", "$order": "identificador_de_la_oferta"}
-        filas += [f for pagina in paginas(dataset, params, fetch=fetch) for f in pagina]
-    return filas
+    params = {"$select": f"{CAMPOS_OFERTA}, count(*) as filas", "$group": CAMPOS_OFERTA,
+              "$where": f"id_del_proceso_de_compra in ({lista})", "$order": "identificador_de_la_oferta"}
+    return [f for pagina in paginas(dataset, params, fetch=fetch) for f in pagina]
 
 
-def cargar_ofertas(base, portafolios, fetch=http, lote=150):
-    """Agrupa en el servidor: cada oferta viene repetida una vez por renglón de la lista de precios.
-    Si SECOP no responde un lote, lo parte en dos hasta aislar el proceso que falla; ese se salta y se informa."""
-    total, fallidos = 0, []
+def _cargar_de(base, dataset, portafolios, fetch, lote):
+    """Carga por lotes; si SECOP no responde uno, lo parte en dos hasta aislar el proceso que falla."""
+    total, fallidos, encontrados = 0, [], set()
     pendientes = [portafolios[i:i + lote] for i in range(0, len(portafolios), lote)][::-1]
     while pendientes:
         grupo = pendientes.pop()
         try:
-            filas = _pedir_ofertas(grupo, fetch)
+            filas = _pedir_ofertas(dataset, grupo, fetch)
         except OSError:  # incluye TimeoutError y los errores de red de urllib
             if len(grupo) == 1:
                 fallidos.append(grupo[0])
@@ -73,7 +69,18 @@ def cargar_ofertas(base, portafolios, fetch=http, lote=150):
                 pendientes += [grupo[mitad:], grupo[:mitad]]
             continue
         total += base.guardar_ofertas([oferta(f) for f in filas])
-    return total, fallidos
+        encontrados |= {f.get("id_del_proceso_de_compra") for f in filas}
+    return total, fallidos, encontrados
+
+
+def cargar_ofertas(base, portafolios, fetch=http, lote=25):
+    """Agrupa en el servidor: cada oferta viene repetida una vez por renglón de la lista de precios.
+    Lotes de 25: con lotes grandes SECOP tarda minutos y responde vacío, sin error. El histórico se consulta solo
+    para los procesos que no aparecieron en el dataset actual."""
+    total, fallidos, encontrados = _cargar_de(base, OFERTAS, portafolios, fetch, lote)
+    faltan = [p for p in portafolios if p not in encontrados and p not in fallidos]
+    total_h, fallidos_h, _ = _cargar_de(base, OFERTAS_HISTORICO, faltan, fetch, lote)
+    return total + total_h, fallidos + fallidos_h
 
 
 def sin_ofertas(base):
