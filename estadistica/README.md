@@ -11,6 +11,7 @@ Se actualiza sola cada lunes.
 cd estadistica
 uv run python -m secop_estadistica actualizar --desde 2018-01-01   # carga completa (una vez)
 uv run python -m secop_estadistica actualizar                      # semanal: re-lee los últimos 120 días
+uv run python -m secop_estadistica monitor                         # diario: procesos abiertos a Odoo y precio para ganar
 uv run python -m secop_estadistica reporte                         # informe en reportes/AAAA-MM-DD.md
 uv run pytest                                                      # pruebas
 ```
@@ -64,9 +65,40 @@ uv run pytest                                                      # pruebas
 6. **El mismo proveedor aparece con y sin dígito de verificación.** El NIT se normaliza a 9 dígitos. Los consorcios y uniones temporales a veces traen «No Definido» como NIT.
 7. **Rezago:** los datos abiertos llegan con cerca de un día de retraso. Un proceso se adjudica semanas después de publicarse, por eso la carga semanal re-lee 120 días.
 
+## Monitor diario (7:30 a. m.)
+
+`secop_estadistica/monitor.py`, con el temporizador `systemd/secop-monitor.timer`. Necesita Odoo corriendo (`docker compose up -d`).
+
+1. **Trae de SECOP los procesos abiertos del nicho.**
+   - Modalidades: mínima cuantía y régimen especial con ofertas.
+   - Solo los publicados en los últimos 3 días que todavía reciben ofertas.
+   - Todos quedan también en la base.
+2. **Los crea en Odoo** en «Detectado», con el mismo importador del menú (entidad, presupuesto, cierre, plazo), y deja una nota. Si ya existen, no los duplica.
+3. **Calcula el precio para ganar** en todos los procesos SECOP abiertos de Odoo y lo escribe en la pestaña SECOP:
+   - precio sugerido;
+   - probabilidad de ganar;
+   - análisis con opciones y competidores probables.
+
+   Si pones el **costo estimado** del proceso, el análisis calcula la utilidad; sin costo, solo da la probabilidad por precio.
+
+Credenciales de Odoo: variables `LUMAK_ODOO_URL`, `LUMAK_ODOO_DB`, `LUMAK_ODOO_USUARIO` y `LUMAK_ODOO_CLAVE`. Por defecto son las del Odoo local.
+
+## Precio para ganar (`precio.py`)
+
+- **Probabilidad de ganar con un descuento d.** Se toman los procesos del nicho de los últimos 3 años con datos confiables. La probabilidad es la parte de ellos en que el ganador ofertó un descuento menor o igual a d: con esa oferta, Lumak le habría ganado.
+- **Utilidad.** Precio sin IVA, menos SIMPLE (5,9 %) y estampillas, menos el costo.
+- **Precio sugerido.** El que maximiza probabilidad × utilidad. Además hay tres opciones, para 50 %, 70 % y 85 % de probabilidad.
+- **Competidores probables.** Primero quienes ya le ofertaron a esa entidad en el nicho; si son pocos, los más activos del nicho en el departamento.
+- **Supuestos que hay que tener presentes:**
+  - Lumak cumple todos los requisitos.
+  - La competencia se comporta como en los últimos 3 años.
+  - Una oferta nueva no cambia el comportamiento de las demás.
+
+  Con menos de unos 30 comparables, el número es solo orientativo.
+
 ## Siguiente paso: predicciones
 
 Con esta base se pueden entrenar, en orden de dificultad:
 1. **¿Quién se presenta?** Probabilidad por proveedor, según su historial con la entidad, el departamento, el tipo de objeto y el rango de presupuesto (`v_rivales_por_entidad`).
-2. **¿A qué precio se gana?** Distribución del descuento ganador según n.º de ofertas esperadas, presupuesto, tipo de entidad y nicho (`v_procesos` con calidad buena).
-3. **¿Cuánto se puede ganar?** Valor esperado = probabilidad de ganar con un precio dado × margen sobre el costo.
+2. **¿A qué precio se gana?** Hecho en su versión simple (`precio.py`). Lo que sigue: condicionar por el número de ofertas esperadas, el presupuesto, el tipo de entidad y el departamento.
+3. **¿Cuánto se puede ganar?** Hecho: utilidad esperada = probabilidad de ganar con un precio × margen sobre el costo.

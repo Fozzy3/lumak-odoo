@@ -6,7 +6,8 @@ from pathlib import Path
 def millones(valor):
     if valor is None:
         return "—"
-    return "$" + f"{valor / 1e6:,.1f}".replace(",", "_").replace(".", ",").replace("_", ".") + " M"
+    signo = "-" if valor < 0 else ""
+    return signo + "$" + f"{abs(valor) / 1e6:,.1f}".replace(",", "_").replace(".", ",").replace("_", ".") + " M"
 
 
 def pct(valor):

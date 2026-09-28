@@ -3,6 +3,7 @@
   uv run python -m secop_estadistica actualizar                      semanal: re-lee los últimos 120 días
   uv run python -m secop_estadistica completar                       reanuda: ofertas que faltan y contratos
   uv run python -m secop_estadistica reclasificar                    vuelve a marcar el nicho con el clasificador actual
+  uv run python -m secop_estadistica monitor                         diario: procesos abiertos a Odoo y precio para ganar
   uv run python -m secop_estadistica reporte                         informe en reportes/AAAA-MM-DD.md
 """
 import argparse
@@ -26,6 +27,9 @@ def main():
     comp = sub.add_parser("completar")
     comp.add_argument("--contratos-desde", default=None, help="también baja los contratos firmados desde esa fecha")
     sub.add_parser("reclasificar")
+    mon = sub.add_parser("monitor")
+    # 3 días: si el equipo estuvo apagado un fin de semana, al prenderlo recoge lo publicado mientras tanto
+    mon.add_argument("--desde", default=str(date.today() - timedelta(days=3)))
     sub.add_parser("reporte")
     args = parser.parse_args()
     base = Base.abrir(BASE)
@@ -37,6 +41,12 @@ def main():
         n, fallidos = cargar_ofertas(base, faltan)
         c = cargar_contratos(base, args.contratos_desde) if args.contratos_desde else 0
         print(f"ofertas {n} de {len(faltan)} procesos pendientes; contratos {c}; sin respuesta de SECOP: {len(fallidos)}")
+    elif args.orden == "monitor":
+        from .monitor import Odoo, sincronizar
+        r = sincronizar(base, Odoo.desde_entorno(), args.desde)
+        print(f"abiertos del nicho {r['abiertos']}, nuevos en Odoo {r['creados']}, analizados {r['analizados']}")
+        for id_proceso, error in r["errores"]:
+            print(f"  sin importar {id_proceso}: {error}")
     elif args.orden == "reclasificar":
         print(f"procesos que cambiaron de nicho: {reclasificar(base)}")
     else:

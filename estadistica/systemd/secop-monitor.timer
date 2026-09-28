@@ -1,0 +1,10 @@
+[Unit]
+Description=Trae cada mañana los procesos de SECOP abiertos del nicho
+
+[Timer]
+# 7:30: después de la actualización semanal de los lunes a las 6:00 (la base admite un solo proceso escribiendo)
+OnCalendar=*-*-* 07:30:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

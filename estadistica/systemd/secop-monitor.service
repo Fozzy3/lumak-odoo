@@ -1,0 +1,10 @@
+[Unit]
+Description=Monitor diario de SECOP: procesos abiertos del nicho a Odoo y precio para ganar según el histórico
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Documents/repos/odoo/estadistica
+# Odoo tiene que estar corriendo (docker compose up -d en la carpeta odoo)
+ExecStart=%h/.local/bin/uv run --quiet python -m secop_estadistica monitor

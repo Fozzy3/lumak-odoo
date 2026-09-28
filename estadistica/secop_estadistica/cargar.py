@@ -21,13 +21,18 @@ CAMPOS_OFERTA = ("identificador_de_la_oferta, id_del_proceso_de_compra, nit_del_
                  "valor_de_la_oferta, fecha_de_registro, invitacion_directa")
 
 
-def filtro_procesos(desde):
-    modalidades = ", ".join(f"'{m}'" for m in MODALIDADES)
-    palabras = " or ".join(f"upper(nombre_del_procedimiento) like '%{p}%'" for p in PALABRAS)
+def filtro_procesos(desde, modalidades=MODALIDADES):
+    modalidades = ", ".join(f"'{m}'" for m in modalidades)
+    en_nombre = " or ".join(f"upper(nombre_del_procedimiento) like '%{p}%'" for p in PALABRAS)
+    en_texto = " or ".join(f"upper(nombre_del_procedimiento) like '%{p}%' or upper(descripci_n_del_procedimiento) like '%{p}%'"
+                           for p in PALABRAS)
+    # SECOP publica 3 de cada 4 procesos nuevos con categoría UNSPECIFIED y la llena días después: a esos se les
+    # busca por las palabras del nombre y la descripción; el clasificador decide si son del nicho
     return (f"modalidad_de_contratacion in ({modalidades}) and fecha_de_publicacion_del >= '{desde}' and ("
             "codigo_principal_de_categoria like 'V1.43%' or codigo_principal_de_categoria like 'V1.81%' or "
             "((codigo_principal_de_categoria like 'V1.80%' or codigo_principal_de_categoria like 'V1.82%' or "
-            f"codigo_principal_de_categoria like 'V1.84%') and ({palabras})))")
+            f"codigo_principal_de_categoria like 'V1.84%') and ({en_nombre})) or "
+            f"(codigo_principal_de_categoria = 'UNSPECIFIED' and ({en_texto})))")
 
 
 def cargar_procesos(base, desde, fetch=http):

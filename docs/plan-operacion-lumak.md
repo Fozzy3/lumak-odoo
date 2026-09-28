@@ -77,7 +77,7 @@ Ojo con el SIMPLE: la tarifa de Lumak es **5,9 %** hasta 6.000 UVT de ingresos a
 
 | Paso | Dónde | Qué hace Odoo solo | Qué haces tú |
 |---|---|---|---|
-| 1. Detectar | Botón «Importar desde SECOP» del tablero (o *CRM → Licitaciones*) | Crea el proceso con la entidad (NIT y DV), el presupuesto, la modalidad, la fecha de cierre y el plazo | Pegar el enlace, el ID o la referencia |
+| 1. Detectar | **Automático cada mañana** (7:30): el monitor trae los procesos abiertos del nicho. A mano: botón «Importar desde SECOP» del tablero | Crea el proceso con la entidad (NIT y DV), el presupuesto, la modalidad, la fecha de cierre y el plazo | Pegar el enlace, el ID o la referencia |
 | 2. Evaluar | Tarjeta del proceso | Cuenta regresiva de colores. El cierre y el límite de observaciones quedan en el **Calendario**, con recordatorio | Leer la invitación, decidir y hacer observaciones |
 | 3. Preparar la oferta | Pasar a «Preparando oferta» | **Crea la cotización** (la oferta económica) al tope del presupuesto. Agenda 8 pasos contados desde el cierre | Poner el costo estimado. Bajar el precio en la cotización |
 | 4. Documentos | Botón **«Preparar documentos de la oferta»** | Genera carta de presentación, oferta económica, certificación de aportes (art. 50), compromiso anticorrupción, declaración de inhabilidades y formato de experiencia. Les suma los certificados del kit vigentes al cierre. Todo queda en un mensaje: **«Descargar archivos» baja un ZIP**. Avisa lo que falta o vence, si la oferta supera el presupuesto o si el precio no cubre el costo | Firmar (sección 5.3) y subir a SECOP II |
@@ -91,6 +91,13 @@ costo ÷ (1 − 0,059 − estampillas)
 ```
 
 Si la cotización queda por debajo, la ficha lo dice en rojo.
+
+**Precio para ganar.** El monitor diario escribe en la pestaña SECOP:
+- el precio sugerido y la probabilidad de ganar;
+- las opciones para ganar con 50 %, 70 % y 85 % de probabilidad;
+- los competidores probables.
+
+Todo sale del histórico de SECOP (`estadistica/README.md`). Con el costo estimado, el sugerido es el que deja la mejor utilidad esperada.
 
 **Lista de precios de SECOP.** Es el total de la cotización, con IVA. Si no coincide con el anexo, manda la plataforma, y la oferta económica no se subsana.
 
