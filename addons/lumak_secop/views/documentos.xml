@@ -61,6 +61,11 @@
                             <field name="lumak_fecha_constitucion"/>
                             <field name="lumak_tiene_empleados"/>
                         </group>
+                        <group string="Contador (certificación MiPyME)">
+                            <field name="lumak_contador_nombre"/>
+                            <field name="lumak_contador_cc"/>
+                            <field name="lumak_contador_tp"/>
+                        </group>
                     </group>
                 </page>
             </page>
@@ -81,6 +86,8 @@
                 <field name="secop_plazo"/>
                 <field name="secop_validez_dias"/>
                 <field name="secop_adendas"/>
+                <field name="secop_menores"/>
+                <field name="secop_anexo_cumplimiento"/>
             </field>
         </field>
     </record>

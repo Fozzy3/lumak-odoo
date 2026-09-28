@@ -5,7 +5,7 @@ from odoo import fields
 from odoo.exceptions import UserError
 from odoo.tests import TransactionCase, tagged
 
-from odoo.addons.lumak_secop.models.documentos import periodo_aportes, valor_en_letras
+from odoo.addons.lumak_secop.models.documentos import periodo_aportes, periodo_mipyme, valor_en_letras
 
 PDF = base64.b64encode(b"%PDF-1.4 prueba")
 
@@ -14,6 +14,15 @@ class TestAyudas(TransactionCase):
     def test_valor_en_letras(self):
         self.assertEqual(valor_en_letras(11_900_000), "ONCE MILLONES NOVECIENTOS MIL PESOS M/CTE")
         self.assertEqual(valor_en_letras(1_000_000.4), "UN MILLÓN PESOS M/CTE")
+
+    def test_mipyme_income_period(self):
+        constitucion = date(2026, 9, 26)
+        # menos de un año: desde la constitución hasta el último día del mes anterior a la oferta
+        self.assertEqual(periodo_mipyme(constitucion, date(2026, 11, 10)), (constitucion, date(2026, 10, 31)))
+        # el mismo mes de la constitución todavía no hay mes anterior: el corte es la constitución
+        self.assertEqual(periodo_mipyme(constitucion, date(2026, 9, 27)), (constitucion, constitucion))
+        # desde el primer año: el año anterior completo
+        self.assertEqual(periodo_mipyme(constitucion, date(2027, 10, 5)), (date(2026, 1, 1), date(2026, 12, 31)))
 
     def test_aportes_cover_six_months_or_since_constitution(self):
         constitucion = date(2026, 9, 26)
@@ -85,6 +94,26 @@ class TestPaqueteOferta(TransactionCase):
         for texto in ("MC-001-2026", "Municipio de Prueba", "Sistema de información de PQRSD", "Carlos Stiven Mora Hoyos",
                       "1.000.000.000", "ONCE MILLONES NOVECIENTOS MIL PESOS M/CTE", "3 meses"):
             self.assertIn(texto, carta)
+
+    def test_optional_documents_join_the_package_when_they_apply(self):
+        self.lead.action_secop_preparar_oferta()
+        nombres = " ".join(self.lead.message_ids[0].attachment_ids.mapped("name"))
+        for opcional in ("Certificación MiPyME", "Autorización Ley 1918", "Anexo de cumplimiento"):
+            self.assertNotIn(opcional, nombres)
+        self.company.write({"lumak_contador_nombre": "Contadora de Prueba", "lumak_contador_cc": "52.000.000",
+                            "lumak_contador_tp": "123456-T"})
+        self.lead.write({"secop_menores": True, "secop_anexo_cumplimiento": True})
+        self.lead.action_secop_preparar_oferta()
+        adjuntos = self.lead.message_ids[0].attachment_ids
+        nombres = " ".join(adjuntos.mapped("name"))
+        for opcional in ("Certificación MiPyME", "Autorización Ley 1918", "Anexo de cumplimiento"):
+            self.assertIn(opcional, nombres)
+        mipyme = " ".join(adjuntos.filtered(lambda a: "MiPyME" in a.name).raw.decode().split())
+        for texto in ("MICROEMPRESA", "Contadora de Prueba", "123456-T", "32.988 UVT"):
+            self.assertIn(texto, mipyme)
+        anexo = " ".join(adjuntos.filtered(lambda a: "Anexo de cumplimiento" in a.name).raw.decode().split())
+        for texto in ("Ley 1581 de 2012", "WCAG 2.1", "Resolución 1519 de 2020"):
+            self.assertIn(texto, anexo)
 
     def test_warns_when_offer_is_over_budget(self):
         self.lead.order_ids.order_line.price_unit = 20_000_000

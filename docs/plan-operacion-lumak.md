@@ -172,6 +172,9 @@ Reglas que vale la pena recordar:
 | Compromiso anticorrupción | Si la invitación lo pide aparte | En el Documento Tipo basta con la carta |
 | Declaración de inhabilidades y conflicto de intereses | Si la piden aparte | — |
 | Formato de experiencia | Cada oferta, si hay experiencia registrada | Máximo 5 contratos |
+| Certificación MiPyME | Cada oferta, cuando los datos del contador estén en *Datos de la empresa* | Sirve para desempatar y **no se subsana**. Odoo calcula los ingresos (sin los registros SIM) y la clasificación. La firma también el contador |
+| Autorización Ley 1918 | Si marcas «Trato con menores de edad» en el proceso | Por ejemplo, capacitaciones a colegios, también virtuales (Ley 2375 de 2024) |
+| Anexo de cumplimiento | Si marcas «Incluir anexo de cumplimiento» | Datos personales, IA, accesibilidad WCAG 2.1 AA y seguridad. Son compromisos: úsalo cuando el sistema los cumpla |
 | Informe de actividades | Cada pago | Con Vo. Bo. del supervisor |
 | Derecho de petición | Al terminar un contrato | Pide la certificación de experiencia |
 | Solicitud de certificación | Desde cada experiencia registrada | Si la certificación trae un error, pide corregirlo. La del socio va a su nombre, sin membrete de Lumak |
@@ -179,7 +182,7 @@ Reglas que vale la pena recordar:
 Textos adaptados de los formatos oficiales del Documento Tipo de mínima cuantía de Colombia Compra Eficiente (V3, 2024). Detalle en `investigacion/documentos-secop.md`.
 
 **Lo que Odoo no puede hacer por ti:**
-- La **certificación MiPyME**: la firma también el contador y debe decir el valor de los ingresos. Sirve para desempatar y no se subsana.
+- La **firma del contador** en la certificación MiPyME. Odoo la genera, pero él la revisa y la firma.
 - Los formatos propios de cada entidad.
 - El **Formato único de hoja de vida de persona jurídica** de Función Pública: se llena una vez y va en el kit.
 - Los estados financieros.

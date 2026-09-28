@@ -257,6 +257,116 @@
         </t>
     </template>
 
+    <!-- 6. Certificación MiPyME (desempate; Decreto 1082 art. 2.2.1.2.4.2.4). La firma también el contador -->
+    <template id="report_mipyme">
+        <t t-foreach="docs" t-as="o">
+            <t t-set="d" t-value="o._secop_docs()"/>
+            <t t-set="c" t-value="d['company']"/>
+            <t t-call="web.basic_layout">
+                <div class="page" style="font-size: 11pt;">
+                    <t t-call="lumak_secop.secop_membrete"/>
+                    <h5 class="text-center">CERTIFICACIÓN DE TAMAÑO EMPRESARIAL – MIPYME</h5>
+                    <p class="text-center" style="font-size: 9.5pt;">Artículo 2.2.1.2.4.2.4 del Decreto 1082 de 2015; artículos 2.2.1.13.2.1 a 2.2.1.13.2.4 del Decreto 1074 de 2015</p>
+                    <p>Proceso n.º <t t-out="o.secop_numero"/> – <t t-out="o.partner_id.name"/></p>
+                    <p>Los suscritos, <t t-out="c.lumak_representante"/>, C.C. <t t-out="c.lumak_representante_cc"/>, representante legal, y
+                        <t t-out="c.lumak_contador_nombre"/>, C.C. <t t-out="c.lumak_contador_cc"/>, contador público con tarjeta profesional
+                        n.º <t t-out="c.lumak_contador_tp"/>, de <t t-out="c.name"/>, NIT <t t-out="c.vat"/>, certificamos bajo la gravedad del juramento que:</p>
+                    <ol>
+                        <li>La sociedad fue constituida el <t t-out="d['constitucion']"/>
+                            y su actividad principal corresponde al sector SERVICIOS.</li>
+                        <li>Sus ingresos por actividades ordinarias
+                            <t t-if="d['mipyme_primer_ano']">durante el tiempo de operación, con corte al <t t-out="d['mipyme_corte']"/>
+                                (mes inmediatamente anterior a la presentación de la oferta),</t>
+                            <t t-else="">del año <t t-out="d['mipyme_anio']"/>, con corte a 31 de diciembre,</t>
+                            ascienden a $<t t-out="d['mipyme_ingresos']"/>, equivalentes a <t t-out="d['mipyme_uvt']"/> UVT
+                            (UVT <t t-out="d['mipyme_anio_uvt']"/>: $<t t-out="d['mipyme_valor_uvt']"/>).</li>
+                        <li t-if="d['mipyme_micro']">En consecuencia, la sociedad se clasifica como MICROEMPRESA, por tener ingresos inferiores o
+                            iguales a <t t-out="d['mipyme_tope']"/> UVT (sector servicios).</li>
+                        <li t-else="">Los ingresos superan <t t-out="d['mipyme_tope']"/> UVT, el tope de microempresa del sector servicios:
+                            la clasificación debe revisarla el contador.</li>
+                        <li>La sociedad no está obligada a tener revisor fiscal.</li>
+                    </ol>
+                    <p>Adjuntamos copia del certificado de existencia y representación legal expedido por la Cámara de Comercio de Bogotá, y
+                        copia de la tarjeta profesional y del certificado de vigencia y antecedentes disciplinarios del contador.</p>
+                    <p><t t-out="c.city"/>, <t t-out="d['fecha']"/></p>
+                    <div class="row" style="margin-top: 48px;">
+                        <div class="col-6">______________________________<br/><strong t-out="c.lumak_representante"/><br/>
+                            Representante legal</div>
+                        <div class="col-6">______________________________<br/><strong t-out="c.lumak_contador_nombre"/><br/>
+                            Contador público – T.P. <t t-out="c.lumak_contador_tp"/></div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- 7. Ley 1918 de 2018 (modificada por la Ley 2375 de 2024): solo si el contrato implica trato con menores, también virtual -->
+    <template id="report_ley_1918">
+        <t t-foreach="docs" t-as="o">
+            <t t-set="d" t-value="o._secop_docs()"/>
+            <t t-set="c" t-value="d['company']"/>
+            <t t-call="web.basic_layout">
+                <div class="page" style="font-size: 11pt;">
+                    <t t-call="lumak_secop.secop_membrete"/>
+                    <h5 class="text-center">DECLARACIÓN Y AUTORIZACIÓN PARA CONSULTA DE INHABILIDADES POR DELITOS SEXUALES CONTRA MENORES DE EDAD</h5>
+                    <p class="text-center" style="font-size: 9.5pt;">Ley 1918 de 2018, modificada por la Ley 2375 de 2024; Decreto 753 de 2019</p>
+                    <p>Proceso n.º <t t-out="o.secop_numero"/> – <t t-out="o.partner_id.name"/></p>
+                    <p><t t-out="c.lumak_representante"/>, C.C. <t t-out="c.lumak_representante_cc"/>, representante legal de <t t-out="c.name"/>,
+                        NIT <t t-out="c.vat"/>, declaro bajo la gravedad del juramento que ni yo ni las personas relacionadas abajo, que tendrán
+                        trato directo con menores de edad en la ejecución del contrato, de manera presencial o por medios tecnológicos, hemos sido
+                        condenados por delitos contra la libertad, integridad y formación sexuales de personas menores de 18 años.</p>
+                    <p>Cada persona relacionada autoriza expresamente a <t t-out="o.partner_id.name"/> para consultar el registro de inhabilidades
+                        administrado por la Policía Nacional, con el único fin de verificar su idoneidad para este contrato.</p>
+                    <table class="table table-sm table-bordered">
+                        <thead><tr><th>Nombre</th><th>Documento</th><th>Rol en el contrato</th><th style="width: 30%;">Firma de autorización</th></tr></thead>
+                        <tbody>
+                            <tr><td t-out="c.lumak_representante"/><td>C.C. <t t-out="c.lumak_representante_cc"/></td><td>Representante legal</td><td/></tr>
+                            <tr><td style="height: 28px;"/><td/><td/><td/></tr>
+                            <tr><td style="height: 28px;"/><td/><td/><td/></tr>
+                        </tbody>
+                    </table>
+                    <p><t t-out="c.city"/>, <t t-out="d['fecha']"/></p>
+                    <t t-call="lumak_secop.secop_firma"/>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <!-- 8. Anexo de cumplimiento: lo que la entidad tiene que cumplir y no puede escribir sola (docs/plan-operacion-lumak.md) -->
+    <template id="report_anexo_cumplimiento">
+        <t t-foreach="docs" t-as="o">
+            <t t-set="d" t-value="o._secop_docs()"/>
+            <t t-set="c" t-value="d['company']"/>
+            <t t-call="web.basic_layout">
+                <div class="page" style="font-size: 10.5pt;">
+                    <t t-call="lumak_secop.secop_membrete"/>
+                    <h5 class="text-center">ANEXO DE CUMPLIMIENTO NORMATIVO DEL SISTEMA OFRECIDO</h5>
+                    <p>Proceso n.º <t t-out="o.secop_numero"/> – <t t-out="o.partner_id.name"/><br/>Objeto: <t t-out="o.name"/></p>
+                    <p><t t-out="c.name"/>, NIT <t t-out="c.vat"/>, se compromete a que el sistema objeto de esta oferta, y su operación durante
+                        el contrato, cumplan lo siguiente:</p>
+                    <ol>
+                        <li><strong>Protección de datos personales.</strong> Ley 1581 de 2012 y sus decretos reglamentarios (compilados en el
+                            Decreto 1074 de 2015). Lumak actúa como encargado del tratamiento, bajo las instrucciones de la Entidad como responsable;
+                            trata los datos solo para ejecutar el contrato y suscribe el acuerdo de transmisión o la cláusula que la Entidad requiera.</li>
+                        <li><strong>Inteligencia artificial, si el sistema la usa.</strong> Circular Externa 002 de 2024 de la Superintendencia de
+                            Industria y Comercio y Guía ética de inteligencia artificial para el sector público de MinTIC. Los datos personales se
+                            anonimizan o seudonimizan antes de enviarse a un modelo de lenguaje, y cada respuesta queda registrada con sus fuentes.</li>
+                        <li><strong>Accesibilidad.</strong> Pautas WCAG 2.1 nivel AA, según la Resolución 1519 de 2020 de MinTIC.</li>
+                        <li><strong>Seguridad de la información.</strong> Cifrado en tránsito (TLS 1.2 o superior) y en reposo, acceso por roles,
+                            registro de auditoría de cada acción, copias de respaldo y lineamientos del Modelo de Seguridad y Privacidad de la
+                            Información (MSPI) de MinTIC.</li>
+                        <li><strong>Propiedad y custodia de los datos.</strong> Los datos son de la Entidad. Lumak informa dónde se alojan y, al
+                            terminar el contrato, los entrega en formato abierto y los borra de su infraestructura, con constancia escrita.</li>
+                        <li><strong>Incidentes.</strong> Lumak informa a la Entidad cualquier incidente que afecte datos personales tan pronto lo
+                            conozca, para que la Entidad cumpla su deber de reportarlo a la Superintendencia de Industria y Comercio.</li>
+                    </ol>
+                    <p><t t-out="c.city"/>, <t t-out="d['fecha']"/></p>
+                    <t t-call="lumak_secop.secop_firma"/>
+                </div>
+            </t>
+        </t>
+    </template>
+
     <!-- Carta con márgenes de documento: el formato «US Letter» de Odoo reserva espacio para su encabezado -->
     <record id="paperformat_carta" model="report.paperformat">
         <field name="name">Carta (Lumak)</field>
@@ -304,6 +414,27 @@
         <field name="model">crm.lead</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">lumak_secop.report_inhabilidades</field>
+        <field name="paperformat_id" ref="paperformat_carta"/>
+    </record>
+    <record id="action_report_mipyme" model="ir.actions.report">
+        <field name="name">Certificación MiPyME</field>
+        <field name="model">crm.lead</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lumak_secop.report_mipyme</field>
+        <field name="paperformat_id" ref="paperformat_carta"/>
+    </record>
+    <record id="action_report_ley_1918" model="ir.actions.report">
+        <field name="name">Autorización Ley 1918</field>
+        <field name="model">crm.lead</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lumak_secop.report_ley_1918</field>
+        <field name="paperformat_id" ref="paperformat_carta"/>
+    </record>
+    <record id="action_report_anexo_cumplimiento" model="ir.actions.report">
+        <field name="name">Anexo de cumplimiento</field>
+        <field name="model">crm.lead</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lumak_secop.report_anexo_cumplimiento</field>
         <field name="paperformat_id" ref="paperformat_carta"/>
     </record>
 </odoo>

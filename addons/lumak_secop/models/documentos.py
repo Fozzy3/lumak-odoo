@@ -1,5 +1,5 @@
 import base64
-from datetime import timedelta
+from datetime import date, timedelta
 
 from dateutil.relativedelta import relativedelta
 from markupsafe import Markup
@@ -18,6 +18,24 @@ DOCUMENTOS_OFERTA = [
     ("Compromiso anticorrupción", "lumak_secop.report_anticorrupcion"),
     ("Declaración de inhabilidades y conflicto de intereses", "lumak_secop.report_inhabilidades"),
 ]
+
+
+# UVT por año (DIAN) y tope de microempresa del sector servicios (Decreto 1074 de 2015, art. 2.2.1.13.2.2)
+UVT = {2026: 52_374}
+TOPE_MICRO_UVT = 32_988
+
+
+def miles(valor, decimales=0):
+    """1234567.8 -> 1.234.568 (separadores colombianos)."""
+    return f"{valor:,.{decimales}f}".replace(",", "_").replace(".", ",").replace("_", ".")
+
+
+def periodo_mipyme(constitucion, hoy):
+    """Ingresos que cuentan para el tamaño empresarial (Decreto 1074, art. 2.2.1.13.2.3): el año anterior o,
+    si la empresa tiene menos de un año, desde la constitución hasta el último día del mes anterior."""
+    if hoy < constitucion + relativedelta(years=1):
+        return constitucion, max(constitucion, hoy.replace(day=1) - timedelta(days=1))
+    return date(hoy.year - 1, 1, 1), date(hoy.year - 1, 12, 31)
 
 
 def valor_en_letras(valor):
@@ -41,6 +59,9 @@ class ResCompany(models.Model):
     lumak_representante_cc = fields.Char("Cédula del representante legal")
     lumak_representante_cc_expedida = fields.Char("Cédula expedida en")
     lumak_fecha_constitucion = fields.Date("Fecha de constitución")
+    lumak_contador_nombre = fields.Char("Contador público", help="Firma la certificación MiPyME con el representante legal.")
+    lumak_contador_cc = fields.Char("Cédula del contador")
+    lumak_contador_tp = fields.Char("Tarjeta profesional del contador")
     lumak_tiene_empleados = fields.Boolean(
         "Tiene empleados", help="Cambia la certificación de aportes: sin empleados certifica que no ha tenido personal a cargo.")
 
@@ -103,6 +124,10 @@ class CrmLead(models.Model):
     secop_plazo = fields.Char("Plazo de ejecución", help="Como lo dice la invitación, p. ej. «3 meses».")
     secop_validez_dias = fields.Integer("Validez de la oferta (días)", default=90)
     secop_adendas = fields.Char("Adendas aplicadas", default="ninguna")
+    secop_menores = fields.Boolean("Trato con menores de edad",
+                                   help="Ley 1918 de 2018 y Ley 2375 de 2024: agrega la autorización de consulta de inhabilidades.")
+    secop_anexo_cumplimiento = fields.Boolean("Incluir anexo de cumplimiento",
+                                              help="Datos personales, IA, accesibilidad y seguridad del sistema ofrecido.")
 
     def _secop_datos_faltantes(self):
         company = self.company_id or self.env.company
@@ -125,8 +150,14 @@ class CrmLead(models.Model):
         if faltan := self._secop_datos_faltantes():
             raise UserError(_("Para generar los documentos de la oferta falta:\n- %s", "\n- ".join(faltan)))
         Report = self.env["ir.actions.report"]
-        documentos = DOCUMENTOS_OFERTA + ([("Formato de experiencia", "lumak_secop.report_experiencia")]
-                                          if self._secop_experiencias() else [])
+        company = self.company_id or self.env.company
+        opcionales = [
+            (self._secop_experiencias(), ("Formato de experiencia", "lumak_secop.report_experiencia")),
+            (company.lumak_contador_nombre, ("Certificación MiPyME", "lumak_secop.report_mipyme")),
+            (self.secop_menores, ("Autorización Ley 1918", "lumak_secop.report_ley_1918")),
+            (self.secop_anexo_cumplimiento, ("Anexo de cumplimiento", "lumak_secop.report_anexo_cumplimiento")),
+        ]
+        documentos = DOCUMENTOS_OFERTA + [doc for aplica, doc in opcionales if aplica]
         adjuntos = [(f"{i:02d} {nombre} - {self.secop_numero}.pdf", Report._render_qweb_pdf(reporte, self.ids)[0])
                     for i, (nombre, reporte) in enumerate(documentos, start=1)]
         cierre = self.date_deadline or fields.Date.context_today(self)
@@ -153,6 +184,15 @@ class CrmLead(models.Model):
         # El Documento Tipo de CCE admite hasta 5 contratos: van los de mayor valor
         return self.env["lumak.experiencia"].search([("en_oferta", "=", True)], order="valor desc", limit=5)
 
+    def _secop_ingresos(self, desde, hasta):
+        """Ingresos por actividades ordinarias (facturas publicadas, sin IVA). Lo simulado (etiqueta SIM) no cuenta."""
+        facturas = self.env["account.move"].search([
+            ("move_type", "in", ("out_invoice", "out_refund")), ("state", "=", "posted"),
+            ("invoice_date", ">=", desde), ("invoice_date", "<=", hasta)])
+        sim = self.env.ref("lumak_secop.tag_sim", raise_if_not_found=False)
+        reales = facturas.filtered(lambda f: not (sim and sim & f.invoice_line_ids.sale_line_ids.order_id.opportunity_id.tag_ids))
+        return sum(reales.mapped("amount_untaxed_signed"))
+
     # Datos que usan las plantillas de los documentos
     def _secop_docs(self):
         self.ensure_one()
@@ -167,4 +207,18 @@ class CrmLead(models.Model):
             "modalidad": dict(self._fields["secop_modalidad"].selection).get(self.secop_modalidad, ""),
             "aportes_desde": fecha_en_letras(periodo_aportes(company.lumak_fecha_constitucion or hoy, hoy)[0]),
             "desde_constitucion": periodo_aportes(company.lumak_fecha_constitucion or hoy, hoy)[0] == company.lumak_fecha_constitucion,
+            "constitucion": fecha_en_letras(company.lumak_fecha_constitucion) if company.lumak_fecha_constitucion else "",
+            **self._secop_mipyme(company, hoy),
+        }
+
+    def _secop_mipyme(self, company, hoy):
+        desde, corte = periodo_mipyme(company.lumak_fecha_constitucion or hoy, hoy)
+        ingresos = self._secop_ingresos(desde, corte)
+        anio_uvt = corte.year if corte.year in UVT else max(UVT)  # ponytail: agregar la UVT de cada año nuevo
+        en_uvt = ingresos / UVT[anio_uvt]
+        return {
+            "mipyme_primer_ano": desde == company.lumak_fecha_constitucion, "mipyme_corte": fecha_en_letras(corte),
+            "mipyme_anio": corte.year, "mipyme_ingresos": miles(ingresos), "mipyme_uvt": miles(en_uvt, 2),
+            "mipyme_anio_uvt": anio_uvt, "mipyme_valor_uvt": miles(UVT[anio_uvt]), "mipyme_micro": en_uvt <= TOPE_MICRO_UVT,
+            "mipyme_tope": miles(TOPE_MICRO_UVT),
         }
