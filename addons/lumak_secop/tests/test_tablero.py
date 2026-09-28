@@ -39,6 +39,9 @@ class TestTableroEmpresa(TransactionCase):
         obligaciones = self.env["calendar.event"].search([("secop_tipo", "=", "obligacion")])
         self.assertGreaterEqual(len(obligaciones), 15)
         self.assertIn(date(2026, 11, 24), obligaciones.mapped("start_date"), "primer anticipo del SIMPLE")
+        nombres = " ".join(obligaciones.mapped("name"))
+        for tarea in ("libro de actas", "cesión de derechos de autor", "Depositar los estados financieros"):
+            self.assertIn(tarea, nombres)
         bogota = pytz.timezone("America/Bogota")
         for evento in obligaciones:
             self.assertEqual(pytz.utc.localize(evento.start).astimezone(bogota).date(), evento.start_date, evento.name)

@@ -65,6 +65,13 @@ class ResCompany(models.Model):
     lumak_tiene_empleados = fields.Boolean(
         "Tiene empleados", help="Cambia la certificación de aportes: sin empleados certifica que no ha tenido personal a cargo.")
 
+    def _lumak_docs(self):
+        """Datos de los documentos de la empresa (misma forma que los del proceso, para reusar membrete y firma)."""
+        self.ensure_one()
+        hoy = fields.Date.context_today(self)
+        return {"company": self, "fecha": fecha_en_letras(hoy),
+                "vigencia": fecha_en_letras(self.lumak_fecha_constitucion or hoy)}
+
     @api.model
     def action_lumak_datos_empresa(self):
         return {"type": "ir.actions.act_window", "res_model": "res.company", "res_id": self.env.company.id,

@@ -77,6 +77,10 @@
         <field name="name">Acta de inicio (si se pactó)</field>
         <field name="project_id" ref="project_contrato_secop"/><field name="stage_id" ref="task_stage_1"/><field name="sequence">4</field>
     </record>
+    <record id="task_tpl_13" model="project.task">
+        <field name="name">Registro Ley 2013 (bienes, rentas y conflictos de interés) en el aplicativo de Función Pública; actualizarlo cada año</field>
+        <field name="project_id" ref="project_contrato_secop"/><field name="stage_id" ref="task_stage_1"/><field name="sequence">4</field>
+    </record>
     <record id="task_tpl_05" model="project.task">
         <field name="name">Plan de trabajo y entregables</field>
         <field name="project_id" ref="project_contrato_secop"/><field name="stage_id" ref="task_stage_2"/><field name="sequence">5</field>

@@ -99,6 +99,7 @@ class TestSecop(TransactionCase):
         self.assertEqual(plantilla.type_ids.mapped("name"), ["Legalización", "Ejecución", "Facturación y pago",
                                                              "Liquidación y cierre"])
         self.assertTrue(plantilla.task_ids)
+        self.assertTrue(plantilla.task_ids.filtered(lambda t: "Ley 2013" in t.name), "registro de bienes y rentas al contratar")
 
     # --- Importar desde SECOP ---------------------------------------------------------------
     def test_query_from_link_id_or_reference(self):

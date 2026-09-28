@@ -358,7 +358,8 @@
                         <li><strong>Propiedad y custodia de los datos.</strong> Los datos son de la Entidad. Lumak informa dónde se alojan y, al
                             terminar el contrato, los entrega en formato abierto y los borra de su infraestructura, con constancia escrita.</li>
                         <li><strong>Incidentes.</strong> Lumak informa a la Entidad cualquier incidente que afecte datos personales tan pronto lo
-                            conozca, para que la Entidad cumpla su deber de reportarlo a la Superintendencia de Industria y Comercio.</li>
+                            conozca y lo reporta a la Superintendencia de Industria y Comercio dentro de los quince (15) días hábiles siguientes a
+                            detectarlo (Ley 1581 de 2012, art. 18).</li>
                     </ol>
                     <p><t t-out="c.city"/>, <t t-out="d['fecha']"/></p>
                     <t t-call="lumak_secop.secop_firma"/>

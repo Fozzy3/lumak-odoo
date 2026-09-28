@@ -6,6 +6,7 @@ Las fuentes están en `docs/investigacion/`:
 - `documentos-secop.md`: documentos de una oferta, plantillas, firmas y plazos.
 - `impuestos-nomina-obligaciones.md`: IVA, SIMPLE, factura electrónica, contratistas, nómina y calendario legal.
 - `modulos-odoo-libres.md`: qué hay gratis para Odoo 19 Community.
+- `empresa-bien-constituida.md`: libros, gobierno, datos personales, propiedad intelectual, lavado de activos y permisos (sección 12).
 
 Lo marcado *(no verificado)* sale así de esas investigaciones: confírmalo con el contador o con la norma antes de apoyarte en ello.
 
@@ -258,7 +259,7 @@ Textos adaptados de los formatos oficiales del Documento Tipo de mínima cuantí
   - Hoy alcanza con registrar los pagos contra cada factura y con los análisis de Facturación.
   - Cuando haya más de unas 10 facturas al mes, instalar de la OCA (gratis, en la rama 19): `account_financial_report`, `mis_builder` y `account_reconcile_oca`.
 - **Otros costos que no se evitan:**
-  - renovación de la matrícula: el certificado de Cámara dice que Lumak cumple como «pequeña empresa joven» (Ley 1780), así que la primera renovación debería ser gratis;
+  - renovación de la matrícula: el certificado de Cámara dice que Lumak cumple como «pequeña empresa joven» (Ley 1780). La primera renovación es gratis solo si se hace antes del 31 de marzo y sin incumplimientos tributarios (un 2593 tardío basta para perderla). Sin el beneficio cuesta unos $24.200;
   - RUP ($831.000 al año);
   - pólizas cuando las pidan;
   - el diseñador del SG-SST y los exámenes médicos cuando haya empleados.
@@ -272,7 +273,7 @@ Textos adaptados de los formatos oficiales del Documento Tipo de mínima cuantí
   - Mientras sea así, la certificación de aportes «sin empleados» es cierta.
   - **Si decides pagarte salario**, ya hay un trabajador: marca «Tiene empleados» en la compañía y la certificación cambia de texto.
 - **Contratista (fase 2)**, además de lo de la sección 6:
-  - Contrato escrito con **cesión a Lumak de los derechos sobre el código**.
+  - Contrato escrito con **cesión a Lumak de los derechos patrimoniales sobre el código**, con tiempo (todo el término legal), territorio (mundial) e indemnidad. Sin eso, la cesión se limita a 5 años y a Colombia.
   - El SG-SST mínimo (siete estándares de la Resolución 0312 de 2019) aplica también a quien solo tiene contratistas.
 - **Primer empleado (fase 4)**:
   - **Qué exige la ley:**
@@ -352,7 +353,49 @@ Se puede borrar cuando quieras, junto con los demás registros SIM.
 
 ---
 
-## 11. Decisiones que son tuyas
+## 11. Empresa bien constituida: lo que faltaba
+
+Investigación completa, con fuentes, en `investigacion/empresa-bien-constituida.md`.
+
+**Ya está:**
+- **Situación de control** del accionista único: inscrita el 26 sep 2026, según el certificado de Cámara.
+- **Respaldos** de Odoo: `scripts/respaldo.sh` guarda la base y los adjuntos en `~/Respaldos/lumak`; la restauración está probada.
+  - Los libros se conservan **10 años** (Código de Comercio, art. 60), así que una vez al mes hay que copiar un respaldo a un disco externo.
+  - Los XML y PDF de la factura electrónica se adjuntan en Odoo: la solución gratuita de la DIAN no garantiza guardarlos.
+- **Política de tratamiento de datos personales**: Odoo la genera desde *Lumak → Datos de la empresa → ⚙ → Imprimir*, y el kit tiene su espacio.
+
+**Ahora (antes del 26 oct 2026):**
+1. **Cesión de tus derechos de autor a Lumak**, con un acta del accionista único que la autorice (Ley 222, art. 23 num. 7). No tienes contrato con Lumak, así que el código que escribes es tuyo; sin cesión, Lumak no puede licenciarlo ni venderlo. Después, registrar el software en la Dirección Nacional de Derecho de Autor (gratis). Queda en el calendario el 5 oct.
+2. **Inscribir el libro de actas y el de accionistas** en la Cámara ($24.200 cada uno) y expedir el título de acciones. Calendario, 9 oct.
+3. **Cuenta de Lumak en Caja Social** con el capital consignado: las entidades solo pagan a la cuenta registrada de la empresa. Luego, el **balance de apertura** (CCo art. 52) en Odoo: asiento de capital (cuenta 310500) contra el banco.
+4. **Revisar a diario el correo inscrito** en la Cámara y el RUT: por ahí llegan las notificaciones.
+5. **Datos personales:** guardar la prueba de cada autorización y llevar un registro de incidentes. Los incidentes se reportan a la SIC en 15 días hábiles, también cuando Lumak es encargado.
+6. **RIT de Bogotá:** no es automático. Verificarlo antes del 26 nov (está en el calendario del 15 oct).
+
+**Antes del primer contrato:**
+- Plantillas de contrato:
+  - contratista, con cesión mundial por todo el término legal;
+  - acuerdo de transmisión de datos;
+  - condiciones para clientes privados;
+  - acuerdo de confidencialidad.
+- **Debida diligencia** de cada cliente y proveedor, con consulta de listas restrictivas (Ley 2195, art. 12). Aplica porque Lumak reporta al RUB.
+- **Ley 2013:** registro de bienes, rentas y conflictos con el primer contrato estatal, y actualización anual. Ya es una tarea de la plantilla del contrato.
+- **Suplente o poder general:** sin suplente, nadie más puede firmar por Lumak si tú no puedes (unos $190.000–$307.000, *no verificado*).
+- **Marca «Lumak» en la SIC:** $1.455.000 como MiPyME, clases 42 y 9. Es la única protección real del nombre.
+
+**Cierre 2026 (hasta el 31 mar 2027):**
+- Una sola acta que apruebe los estados financieros, el **informe de gestión** (Ley 1258, art. 37) y el proyecto de distribución de utilidades.
+- **Depositar los estados financieros en la Cámara** dentro del mes siguiente (Ley 222, art. 41). Está en el calendario el 30 abr 2027.
+
+**No aplica hoy** (se revisa al crecer):
+- Revisor fiscal: el umbral es 5.000 SMMLV de activos; el de ingresos supera el tope del SIMPLE.
+- Registro Nacional de Bases de Datos.
+- SAGRILAFT y PTEE.
+- Seguros obligatorios.
+- Bomberos, Sayco-Acinpro o uso de suelo: se trabaja desde casa, sin atención al público.
+- Envío de estados financieros a Supersociedades, salvo que lo pida.
+
+## 12. Decisiones que son tuyas
 
 - ¿Hago commit de todo esto? Está sin commit y sin subir.
 - ¿Salario o dividendos? Cambia la certificación de aportes y el costo.

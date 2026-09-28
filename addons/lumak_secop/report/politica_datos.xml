@@ -1,0 +1,87 @@
+<odoo>
+    <!-- Política de tratamiento de datos personales de Lumak como responsable (Ley 1581 de 2012; Decreto 1377 de 2013,
+         compilado en el Decreto 1074 de 2015). Contenido mínimo del art. 13 del Decreto 1377. -->
+    <template id="report_politica_datos">
+        <t t-foreach="docs" t-as="o">
+            <t t-set="d" t-value="o._lumak_docs()"/>
+            <t t-set="c" t-value="o"/>
+            <t t-call="web.basic_layout">
+                <div class="page" style="font-size: 10.5pt;">
+                    <t t-call="lumak_secop.secop_membrete"/>
+                    <h5 class="text-center">POLÍTICA DE TRATAMIENTO DE DATOS PERSONALES</h5>
+
+                    <h6>1. Responsable</h6>
+                    <p><t t-out="c.name"/>, NIT <t t-out="c.vat"/>, con domicilio en <t t-out="c.city"/>, dirección <t t-out="c.street"/>,
+                        correo electrónico <t t-out="c.email"/> y teléfono <t t-out="c.phone"/>. Esta política cumple la Ley 1581 de 2012 y el
+                        Decreto 1377 de 2013, compilado en el Decreto 1074 de 2015.</p>
+
+                    <h6>2. Finalidades: qué datos trata Lumak y para qué</h6>
+                    <ul>
+                        <li><strong>Clientes y prospectos</strong> (entidades públicas, empresas y sus contactos): preparar ofertas y cotizaciones,
+                            celebrar y ejecutar contratos, facturar, cobrar y dar soporte. Enviar información comercial solo si el titular lo autoriza.</li>
+                        <li><strong>Proveedores y contratistas</strong>: seleccionar, contratar y pagar, verificar sus aportes a seguridad social y
+                            cumplir las obligaciones tributarias y contables.</li>
+                        <li><strong>Trabajadores y aspirantes</strong>, cuando los haya: selección, relación laboral, nómina y seguridad social.</li>
+                        <li><strong>Participantes en capacitaciones</strong>: inscripción, asistencia y certificados.</li>
+                    </ul>
+
+                    <h6>3. Datos que Lumak trata como encargado</h6>
+                    <p>En los sistemas que desarrolla u opera para sus clientes, Lumak actúa como <strong>encargado</strong> del tratamiento: trata
+                        esos datos solo según las instrucciones del cliente, que es el responsable, dentro del contrato o del acuerdo de transmisión,
+                        y nunca para fines propios.</p>
+
+                    <h6>4. Datos sensibles y de niños, niñas y adolescentes</h6>
+                    <p>Lumak no solicita datos sensibles salvo que sean necesarios, y en ese caso informa que su entrega es facultativa y pide
+                        autorización expresa. Los datos de menores de edad solo se tratan respetando su interés superior y con autorización de su
+                        representante legal (Ley 1581 de 2012, arts. 6 y 7).</p>
+
+                    <h6>5. Derechos de los titulares</h6>
+                    <p>Conocer, actualizar y rectificar sus datos; pedir prueba de la autorización; ser informado del uso que se les da; presentar
+                        quejas ante la Superintendencia de Industria y Comercio; revocar la autorización o pedir la supresión cuando no se respeten
+                        sus derechos; y acceder gratis a sus datos (Ley 1581 de 2012, art. 8).</p>
+
+                    <h6>6. Quién atiende y cómo</h6>
+                    <p>El representante legal atiende las consultas y reclamos en el correo <t t-out="c.email"/>.</p>
+                    <ul>
+                        <li><strong>Consultas</strong>: se responden en máximo diez (10) días hábiles desde su recibo. Si no es posible, se informa
+                            el motivo y se responden a más tardar cinco (5) días hábiles después (art. 14).</li>
+                        <li><strong>Reclamos</strong> (corregir, actualizar, suprimir, revocar o denunciar un incumplimiento): por escrito, con la
+                            identificación del titular, los hechos, la dirección de respuesta y los documentos. Si el reclamo está incompleto, se pide
+                            completarlo dentro de los cinco (5) días siguientes; si pasan dos (2) meses sin hacerlo, se entiende desistido. Se
+                            responde en máximo quince (15) días hábiles, prorrogables hasta ocho (8) días hábiles más (art. 15).</li>
+                        <li>Antes de acudir a la Superintendencia de Industria y Comercio, el titular debe agotar este trámite (art. 16).</li>
+                    </ul>
+
+                    <h6>7. Seguridad</h6>
+                    <p>Acceso restringido a quien lo necesita, contraseñas y segundo factor de autenticación, copias de respaldo y cifrado. Cuando
+                        Lumak use proveedores de infraestructura, suscribirá con ellos acuerdos que protejan los datos. Los incidentes que
+                        afecten datos personales se reportan a la Superintendencia de Industria y Comercio dentro de los quince (15) días hábiles
+                        siguientes a detectarlos.</p>
+
+                    <h6>8. Vigencia</h6>
+                    <p>Esta política rige desde el <t t-out="d['vigencia']"/>. Los datos se conservan mientras sirvan a las finalidades y durante los
+                        plazos legales de conservación de documentos, que para los soportes contables son de diez (10) años.</p>
+
+                    <h6>Aviso de privacidad (texto corto para formularios y correos)</h6>
+                    <p style="font-size: 9.5pt; border: 1px solid #ccc; padding: 8px;"><t t-out="c.name"/> tratará sus datos personales para
+                        gestionar la relación comercial o contractual, facturar y cumplir obligaciones legales. Puede conocer, actualizar,
+                        rectificar o suprimir sus datos escribiendo a <t t-out="c.email"/>. Consulte la política de tratamiento completa en ese
+                        mismo correo.</p>
+
+                    <p><t t-out="c.city"/>, <t t-out="d['fecha']"/></p>
+                    <t t-call="lumak_secop.secop_firma"/>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <record id="action_report_politica_datos" model="ir.actions.report">
+        <field name="name">Política de tratamiento de datos personales</field>
+        <field name="model">res.company</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lumak_secop.report_politica_datos</field>
+        <field name="print_report_name">'Política de tratamiento de datos - %s' % object.name</field>
+        <field name="paperformat_id" ref="paperformat_carta"/>
+        <field name="binding_model_id" ref="base.model_res_company"/>
+    </record>
+</odoo>

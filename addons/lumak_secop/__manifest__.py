@@ -14,6 +14,7 @@
         "data/obligaciones.xml",
         "report/documentos_oferta.xml",
         "report/documentos_contrato.xml",
+        "report/politica_datos.xml",
         "views/licitaciones.xml",
         "views/contratos.xml",
         "views/documentos.xml",

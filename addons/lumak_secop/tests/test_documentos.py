@@ -112,10 +112,25 @@ class TestPaqueteOferta(TransactionCase):
         for texto in ("MICROEMPRESA", "Contadora de Prueba", "123456-T", "32.988 UVT"):
             self.assertIn(texto, mipyme)
         anexo = " ".join(adjuntos.filtered(lambda a: "Anexo de cumplimiento" in a.name).raw.decode().split())
-        for texto in ("Ley 1581 de 2012", "WCAG 2.1", "Resolución 1519 de 2020"):
+        for texto in ("Ley 1581 de 2012", "WCAG 2.1", "Resolución 1519 de 2020", "quince (15) días hábiles"):
             self.assertIn(texto, anexo)
 
     def test_warns_when_offer_is_over_budget(self):
         self.lead.order_ids.order_line.price_unit = 20_000_000
         self.lead.action_secop_preparar_oferta()
         self.assertIn("supera el presupuesto", self.lead.message_ids[0].body)
+
+
+@tagged("post_install", "-at_install")
+class TestPoliticaDatos(TransactionCase):
+    def test_personal_data_policy_has_what_the_law_requires(self):
+        company = self.env.company
+        company.write({"name": "LUMAK SOLUTIONS S.A.S.", "street": "Calle 1", "city": "Bogotá D.C.",
+                       "email": "datos@lumak.co", "phone": "3000000000", "lumak_fecha_constitucion": date(2026, 9, 26)})
+        html = " ".join(self.env["ir.actions.report"]._render_qweb_html(
+            "lumak_secop.report_politica_datos", company.ids)[0].decode().split())
+        # Decreto 1377 de 2013, art. 13: responsable y contacto, finalidades, derechos, área de atención, procedimiento, vigencia
+        for texto in ("LUMAK SOLUTIONS S.A.S.", "datos@lumak.co", "Ley 1581 de 2012", "Finalidades", "Derechos",
+                      "diez (10) días hábiles", "quince (15) días hábiles", "Vigencia", "encargado"):
+            self.assertIn(texto, html)
+        self.assertTrue(self.env.ref("lumak_secop.doc_politica_datos"), "el kit guarda la versión publicada")

@@ -75,6 +75,12 @@
             <field name="en_oferta" eval="False"/>
             <field name="nota">Para el registro de proveedor en SECOP II, el RUP y los bancos.</field>
         </record>
+        <record id="doc_politica_datos" model="lumak.documento">
+            <field name="name">Política de tratamiento de datos personales</field><field name="sequence">23</field>
+            <field name="emisor">Lumak (Datos de la empresa → ⚙ → Imprimir)</field><field name="vigencia_dias">0</field>
+            <field name="en_oferta" eval="False"/>
+            <field name="nota">Obligatoria para todo responsable (Ley 1581). Publícala en la web cuando exista; mientras tanto, envíala a quien la pida.</field>
+        </record>
         <record id="doc_rup" model="lumak.documento">
             <field name="name">Registro Único de Proponentes (RUP)</field><field name="sequence">22</field>
             <field name="emisor">Cámara de Comercio ($831.000 al año)</field>
