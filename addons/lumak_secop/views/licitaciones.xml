@@ -4,7 +4,7 @@
         <field name="name">lumak.secop.import.form</field>
         <field name="model">lumak.secop.import</field>
         <field name="arch" type="xml">
-            <form string="Importar desde SECOP">
+            <form string="Importar con enlace">
                 <p class="text-muted">Pega el enlace del proceso en SECOP II, su ID (CO1.REQ…) o su referencia.
                     Los datos abiertos llegan con cerca de un día de retraso.</p>
                 <group>
@@ -19,7 +19,7 @@
     </record>
 
     <record id="action_secop_import" model="ir.actions.act_window">
-        <field name="name">Importar desde SECOP</field>
+        <field name="name">Importar con enlace</field>
         <field name="res_model">lumak.secop.import</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
@@ -154,8 +154,13 @@
                     </div>
                 </button>
             </div>
+            <!-- Copia una pregunta con el perfil de la empresa y el proceso, para pegarla en cualquier IA -->
+            <xpath expr="//header" position="inside">
+                <field name="secop_prompt_ia" widget="CopyClipboardButton" string="Preguntar a la IA"
+                       options="{'btn_class': 'secondary'}" invisible="not secop_es_licitacion"/>
+            </xpath>
             <xpath expr="//div[hasclass('oe_title')]" position="before">
-                <div class="o_lumak_form_status" invisible="not secop_es_licitacion">
+                <div class="o_lumak_form_status" name="secop_status" invisible="not secop_es_licitacion">
                     <field name="secop_es_licitacion" invisible="1"/>
                     <field name="secop_urgencia" invisible="1"/>
                     <field name="secop_cierre_label" widget="badge"
@@ -221,6 +226,61 @@
         </field>
     </record>
 
+    <!-- Ficha de un proceso SECOP: la del CRM sin lo genérico (correo, teléfono, probabilidad, leads similares, contactos)
+         y con el siguiente paso arriba. Solo la usan «Mis procesos», el importador y Mercado SECOP. -->
+    <record id="crm_lead_form_secop" model="ir.ui.view">
+        <field name="name">crm.lead.form.secop.simple</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+        <field name="mode">primary</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <button name="action_show_potential_duplicates" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </button>
+            <xpath expr="//div[@id='probability']/.." position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//span[@groups='!crm.group_use_recurring_revenues']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <label for="expected_revenue" position="attributes">
+                <attribute name="string">Presupuesto oficial</attribute>
+                <attribute name="class"/>
+            </label>
+            <xpath expr="//group[@name='opportunity_partner']/field[@name='partner_id']" position="attributes">
+                <attribute name="string">Entidad</attribute>
+            </xpath>
+            <xpath expr="//group[@name='opportunity_partner']//label[@for='email_from']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//group[@name='opportunity_partner']//field[@name='email_from']/.." position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//group[@name='opportunity_partner']//label[@for='phone']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//group[@name='opportunity_partner']//field[@name='phone']/.." position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <!-- La fecha de cierre ya está arriba (cuenta regresiva) y en la pestaña SECOP -->
+            <xpath expr="//label[@for='date_deadline']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//field[@name='date_deadline'][@nolabel='1']/.." position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <page name="lead" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </page>
+            <div name="secop_status" position="after">
+                <div class="alert alert-info o_lumak_siguiente" role="status" invisible="not secop_siguiente_paso">
+                    <strong>Siguiente paso: </strong><field name="secop_siguiente_paso" class="d-inline"/>
+                </div>
+            </div>
+        </field>
+    </record>
+
     <!-- El flujo genérico del CRM queda para clientes privados, llegue uno por el menú o recargando /odoo/crm.
          Sin el filtro «Mi flujo»: en una empresa de una persona solo confunde. -->
     <record id="crm.crm_lead_action_pipeline" model="ir.actions.act_window">
@@ -235,23 +295,20 @@
         <field name="tag">lumak_secop_dashboard</field>
     </record>
 
-    <!-- Acción de servidor: el equipo lo crea scripts/crm_secop.py, así que se busca al abrir el menú -->
+    <!-- Acción de servidor: arma el flujo del CRM solo con el equipo SECOP y sus vistas propias -->
     <record id="action_secop_pipeline" model="ir.actions.server">
-        <field name="name">Licitaciones SECOP</field>
+        <field name="name">Mis procesos</field>
         <field name="model_id" ref="crm.model_crm_lead"/>
         <field name="state">code</field>
         <field name="code">action = model.action_secop_pipeline()</field>
     </record>
 
-    <!-- App «Lumak»: el tablero de toda la empresa. Va primera, así /odoo abre en ella al entrar -->
+    <!-- App «Lumak»: todo SECOP en el orden en que se trabaja. Va primera, así /odoo abre en ella al entrar.
+         1 Tablero · 2 Todo lo publicado (mercado.xml) · 3 Mis procesos · 4 Contratos (contratos.xml) · 5 Por cobrar (facturas.xml)
+         · 6 Mercado (mercado.xml) · 7 Empresa: Kit, Experiencia, Fechas y Datos (cada uno en su archivo) -->
     <menuitem id="menu_lumak_root" name="Lumak" web_icon="lumak_secop,static/description/icon.png" sequence="-10"
               action="action_secop_dashboard"/>
     <menuitem id="menu_lumak_tablero" name="Tablero" parent="menu_lumak_root" action="action_secop_dashboard" sequence="1"/>
-
-    <!-- Primero en el CRM: al abrir la app se entra a los procesos SECOP -->
-    <menuitem id="menu_secop_root" name="Licitaciones" parent="crm.crm_menu_root" sequence="0"/>
-    <menuitem id="menu_secop_pipeline" name="Procesos SECOP" parent="menu_secop_root"
-              action="action_secop_pipeline" sequence="1"/>
-    <menuitem id="menu_secop_import" name="Importar desde SECOP" parent="menu_secop_root"
-              action="action_secop_import" sequence="2"/>
+    <menuitem id="menu_secop_pipeline" name="Mis procesos" parent="menu_lumak_root" action="action_secop_pipeline" sequence="3"/>
+    <menuitem id="menu_lumak_empresa_grupo" name="Empresa" parent="menu_lumak_root" sequence="7"/>
 </odoo>

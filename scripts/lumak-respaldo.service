@@ -1,0 +1,7 @@
+[Unit]
+Description=Respaldo diario del Odoo de Lumak (base de datos y adjuntos) en ~/Respaldos/lumak
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=%h/Documents/repos/odoo/scripts/respaldo.sh

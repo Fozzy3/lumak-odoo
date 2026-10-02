@@ -100,5 +100,18 @@
                 experiencia de cada oferta.</p>
         </field>
     </record>
-    <menuitem id="menu_secop_experiencia" name="Experiencia" parent="menu_lumak_root" action="action_lumak_experiencia" sequence="3"/>
+    <menuitem id="menu_secop_experiencia" name="Experiencia" parent="menu_lumak_empresa_grupo" action="action_lumak_experiencia" sequence="2"/>
+
+    <!-- Contratos: los proyectos que nacen de lo adjudicado o firmado (sin las plantillas) -->
+    <record id="action_lumak_contratos" model="ir.actions.act_window">
+        <field name="name">Contratos</field>
+        <field name="res_model">project.project</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('is_template', '=', False)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Todavía no hay contratos</p>
+            <p>Cuando un proceso pase a «Adjudicado» o un cliente firme su cotización, aquí aparece su proyecto con las tareas y el objetivo de pago.</p>
+        </field>
+    </record>
+    <menuitem id="menu_lumak_contratos" name="Contratos" parent="menu_lumak_root" action="action_lumak_contratos" sequence="4"/>
 </odoo>

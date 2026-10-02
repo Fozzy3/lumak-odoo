@@ -1,0 +1,16 @@
+; Plantilla de config/odoo.conf (ese archivo no va a git: lleva la clave maestra).
+; Crear: cp config/odoo.conf.example config/odoo.conf y cambiar admin_passwd por el hash de una clave larga:
+;   docker compose run --rm --no-deps odoo python3 -c "from passlib.context import CryptContext; print(CryptContext(['pbkdf2_sha512']).hash(input()))"
+[options]
+addons_path = /mnt/extra-addons
+data_dir = /var/lib/odoo
+; Clave maestra: protege crear, copiar, respaldar y borrar bases desde la web. Sin esto, es «admin».
+admin_passwd = CAMBIAR
+; Una sola base y sin gestor de bases en la web
+db_name = lumak
+dbfilter = ^lumak$
+list_db = False
+; Detrás del túnel: toma el dominio y el https de las cabeceras X-Forwarded-*
+proxy_mode = True
+; ponytail: workers = 0 (hilos) basta para 2 usuarios; con más, subir workers y enrutar /websocket al puerto 8072
+workers = 0

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="lumak_secop.PublicadosListRenderer" t-inherit="web.ListRenderer" t-inherit-mode="primary">
+        <xpath expr="//table" position="before">
+            <div class="alert alert-info m-2" role="note">
+                Todo lo de tecnología que publica SECOP en mínima cuantía y régimen especial.
+                Los <strong>del nicho</strong> que siguen abiertos ya llegan solos cada mañana a <em>Mis procesos → Por revisar</em>;
+                lo demás queda aquí por si algo te sirve: <strong>«Traer a mi flujo»</strong>.
+                Estar aquí no quiere decir que puedas participar: eso lo dicen los requisitos de cada proceso
+                (ábrelo y usa «Preguntar a la IA»).
+            </div>
+        </xpath>
+    </t>
+</templates>

@@ -69,7 +69,7 @@ class TestSecop(TransactionCase):
         env = cls.env
         ref = lambda name: env.ref(f"lumak_secop.{name}")
         cls.team = ref("team_secop")
-        cls.detectado, cls.evaluando = ref("stage_detectado"), ref("stage_evaluando")
+        cls.detectado = ref("stage_detectado")
         cls.preparando, cls.presentada = ref("stage_preparando"), ref("stage_presentada")
         cls.adjudicado = ref("stage_adjudicado")
         cls.plan_oferta, cls.plan_post = ref("plan_oferta_mc"), ref("plan_post_cierre")
@@ -84,13 +84,15 @@ class TestSecop(TransactionCase):
     def test_module_installs_the_bidding_setup(self):
         self.assertTrue(self.team.es_licitaciones)
         etapas = self.env["crm.stage"].search([("team_ids", "in", self.team.ids)])
-        self.assertEqual(etapas.mapped("name"), ["Detectado", "Evaluando", "Preparando oferta", "Oferta presentada",
-                                                 "En evaluación", "Adjudicado"])
+        # 4 etapas: Odoo actúa solo al entrar a las 3 últimas
+        self.assertEqual(etapas.mapped("name"), ["Por revisar", "Preparando oferta", "Presentada", "Adjudicado"])
         self.assertEqual(etapas.filtered("is_won"), self.adjudicado)
         self.assertTrue(all(e.requirements for e in etapas))
         self.assertFalse(self.env["crm.stage"].search([("team_ids", "=", False)]), "no quedan etapas globales")
         self.assertEqual(self.env.ref("crm.stage_lead1").team_ids, self.env.ref("sales_team.team_sales_department"))
-        self.assertTrue(self.plan_oferta.template_ids and self.plan_post.template_ids)
+        # Solo lo obligatorio: 4 antes del cierre y 1 después (lo opcional va en el texto de la etapa)
+        self.assertEqual(len(self.plan_oferta.template_ids), 4)
+        self.assertEqual(len(self.plan_post.template_ids), 1)
         self.assertEqual(set(self.plan_oferta.template_ids.mapped("delay_from")), {"before_plan_date"})
         self.assertEqual(set(self.plan_post.template_ids.mapped("delay_from")), {"after_plan_date"})
         self.assertTrue(self.env.ref("lumak_secop.lost_mipyme"))
@@ -159,13 +161,14 @@ class TestSecop(TransactionCase):
         self.assertEqual(action["context"]["default_team_id"], self.team.id)
         self.assertNotIn("search_default_assigned_to_me", action["context"])
         # copia la acción genérica del CRM: sin esto hereda su título («Clientes privados») y su ruta /odoo/crm al recargar
-        self.assertEqual(action.get("display_name", action["name"]), "Licitaciones SECOP")
+        self.assertEqual(action.get("display_name", action["name"]), "Mis procesos")
         self.assertNotIn("path", action)
         self.assertNotIn("id", action)
         views = dict((mode, view) for view, mode in action["views"])
         self.assertEqual(views["kanban"], self.env.ref("lumak_secop.crm_lead_kanban_secop").id)
         self.assertEqual(views["list"], self.env.ref("lumak_secop.crm_lead_list_secop").id)
         self.assertEqual(views["calendar"], self.env.ref("lumak_secop.crm_lead_calendar_secop").id)
+        self.assertEqual(views["form"], self.env.ref("lumak_secop.crm_lead_form_secop").id, "ficha solo con lo de SECOP")
 
     def test_pipeline_action_filters(self):
         semana = self.env["crm.lead"].action_secop_pipeline(filtro="semana")
@@ -199,9 +202,46 @@ class TestSecop(TransactionCase):
             self.assertEqual(record.with_context(lang="es_CO").name, "Clientes privados")
             self.assertEqual(record.with_context(lang="en_US").name, "Clientes privados")
 
-    def test_crm_app_opens_on_licitaciones(self):
-        self.assertLess(self.env.ref("lumak_secop.menu_secop_root").sequence,
-                        self.env.ref("crm.crm_menu_sales").sequence)
+    def test_everything_secop_is_in_the_lumak_app_in_working_order(self):
+        hijos = lambda xmlid: self.env.ref(xmlid).child_id.sorted("sequence").mapped("name")
+        self.assertEqual(hijos("lumak_secop.menu_lumak_root"),
+                         ["Tablero", "Todo lo publicado", "Mis procesos", "Contratos", "Por cobrar", "Mercado", "Empresa"])
+        self.assertEqual(hijos("lumak_secop.menu_lumak_mercado"), ["Estadísticas", "Competidores", "Estrategia"])
+        self.assertEqual(hijos("lumak_secop.menu_lumak_empresa_grupo"),
+                         ["Kit de la empresa", "Experiencia", "Fechas de la empresa", "Datos de la empresa"])
+        self.assertFalse(self.env.ref("lumak_secop.menu_secop_root", raise_if_not_found=False), "ya no hay Licitaciones en el CRM")
+
+    def test_the_form_says_what_to_do_next_in_each_stage(self):
+        lead = self._lead()
+        pasos = {}
+        for etapa in (self.detectado, self.preparando, self.presentada, self.adjudicado):
+            lead.stage_id = etapa
+            pasos[etapa.name] = lead.secop_siguiente_paso
+        self.assertIn("«Preparando oferta»", pasos["Por revisar"])
+        self.assertIn("«Preparar documentos de la oferta»", pasos["Preparando oferta"])
+        self.assertIn("«Ganado»", pasos["Presentada"])
+        self.assertIn("proyecto", pasos["Adjudicado"])
+        lead.stage_id = self.presentada  # Odoo no deja perder lo que está en una etapa ganada
+        lead.action_set_lost()
+        self.assertFalse(lead.secop_siguiente_paso)
+
+    def test_ask_the_ai_copies_a_prompt_with_the_company_and_the_process(self):
+        empresa = self.env.company
+        self.assertIn("a la medida", empresa.lumak_perfil_ia, "trae un perfil de arranque que el usuario ajusta")
+        empresa.write({"lumak_perfil_ia": "Somos 2 personas y hacemos software a la medida.",
+                       "lumak_representante_cc": "80123456", "lumak_fecha_constitucion": date(2026, 9, 26)})
+        agencia = self.env["res.partner"].create({"name": "Agencia Catastral de Cundinamarca", "is_company": True})
+        self.env["lumak.experiencia"].create({"contratante_id": agencia.id, "objeto": "Desarrollo frontend del geoportal",
+                                              "valor": 17_125_667, "de_socio": True, "fecha_fin": date(2023, 12, 15)})
+        lead = self._lead(name="Sistema de PQRSD", partner_id=agencia.id, secop_id=ROW["id_del_proceso"],
+                          secop_url=ROW["urlproceso"]["url"], secop_modalidad="minima", expected_revenue=49_000_000,
+                          date_deadline=date(2026, 10, 1), secop_hora_cierre=10)
+        prompt = lead.secop_prompt_ia
+        for texto in ("Somos 2 personas", "26/09/2026", "Desarrollo frontend del geoportal", "$17,1 M", "del socio",
+                      "Sistema de PQRSD", "Mínima cuantía", "$49 M", "01/10/2026 10:00 a. m.", ROW["urlproceso"]["url"],
+                      f"p6dx-8zbt.json?id_del_proceso={ROW['id_del_proceso']}", "¿Encaja"):
+            self.assertIn(texto, prompt)
+        self.assertNotIn("80123456", prompt, "los datos personales no salen hacia otra IA")
 
     def test_open_in_secop(self):
         lead = self._lead(secop_url=ROW["urlproceso"]["url"])
@@ -214,13 +254,15 @@ class TestSecop(TransactionCase):
         self._lead(date_deadline=self.today + timedelta(days=2), expected_revenue=10_000_000)
         self._lead(date_deadline=self.today + timedelta(days=20), expected_revenue=30_000_000)
         self._lead(stage_id=self.adjudicado.id, expected_revenue=5_000_000)
-        perdido = self._lead(expected_revenue=50_000_000, secop_precio_ganador=40_000_000)
+        perdido = self._lead(stage_id=self.presentada.id, expected_revenue=50_000_000, secop_precio_ganador=40_000_000)
         perdido.action_set_lost()
+        descartado = self._lead(expected_revenue=20_000_000, secop_precio_ganador=1_000_000)  # en «Por revisar»: no oferté
+        descartado.action_set_lost()
         data = Lead.get_secop_dashboard()
         self.assertEqual(data["activos"] - base["activos"], 2)
         self.assertEqual(data["cierran_semana"] - base["cierran_semana"], 1)
         self.assertEqual(data["ganados"] - base["ganados"], 1)
-        self.assertEqual(data["perdidos"] - base["perdidos"], 1)
+        self.assertEqual(data["perdidos"] - base["perdidos"], 1, "solo cuenta lo que ofertamos y no ganamos")
         if not base["descuento_n"]:
             self.assertEqual((data["descuento_ganador"], data["descuento_n"]), (20, 1))
         self.assertTrue(data["proximos"][0]["cierre_label"])
@@ -235,7 +277,7 @@ class TestSecop(TransactionCase):
         lead.stage_id = self.preparando
         expected = sorted(cierre - timedelta(days=t.delay_count) for t in self.plan_oferta.template_ids)
         self.assertEqual(self._dates(lead), expected)
-        lead.stage_id = self.evaluando
+        lead.stage_id = self.detectado
         lead.stage_id = self.preparando  # volver a la etapa no duplica el plan
         self.assertEqual(len(lead.activity_ids), len(self.plan_oferta.template_ids))
 

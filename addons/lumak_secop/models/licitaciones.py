@@ -31,11 +31,39 @@ MODALIDAD_SECOP = [
 ETIQUETAS = {"Territorial": "lumak_secop.tag_territorial", "Nacional": "lumak_secop.tag_nacional"}
 # Al entrar a la etapa se agenda el plan una sola vez, contando desde la fecha de cierre.
 PLANES_POR_ETAPA = {"lumak_secop.stage_preparando": "lumak_secop.plan_oferta_mc", "lumak_secop.stage_presentada": "lumak_secop.plan_post_cierre"}
+# Lo que toca hacer en cada etapa; se muestra arriba en la ficha del proceso
+SIGUIENTE_PASO = {
+    "lumak_secop.stage_detectado": "Lee la invitación (botón «Abrir en SECOP»). Si vas: pásalo a «Preparando oferta». "
+                                   "Si no: «Perdido» con el motivo.",
+    "lumak_secop.stage_preparando": "Pon el costo estimado en la pestaña SECOP, fija el precio en la cotización y pulsa "
+                                    "«Preparar documentos de la oferta». Presenta en SECOP II y pásalo a «Presentada».",
+    "lumak_secop.stage_presentada": "Espera el informe de evaluación y subsana si te lo piden. Si ganas: «Ganado». "
+                                    "Si no: «Perdido» y anota el precio ganador.",
+    "lumak_secop.stage_adjudicado": "Aprueba el contrato electrónico en SECOP II. Lo demás sigue en el proyecto del contrato "
+                                    "(botón de arriba).",
+}
 PARTICULAS = {"de", "del", "la", "las", "el", "los", "y", "e", "o", "u", "para", "por", "en", "a", "al",
               "con", "sin", "sobre", "entre", "su", "sus", "que"}
 SIGLAS = {"ESE", "IPS", "EPS", "TIC", "TICS", "IA", "SECOP", "SENA", "ICBF", "DANE", "NIT", "RUT", "SAS", "S.A.S",
           "ERP", "CRM", "API", "PAE", "PETI", "MSPI", "MIPG", "SST", "SGSST", "IE", "I.E", "ESP", "PGIRS", "POT",
           "SISBEN", "SIMAT", "SIGEP", "SGC", "ISO", "UD", "UNAL", "SAMC"}
+# «Preguntar a la IA»: el perfil de arranque (el usuario lo ajusta en Datos de la empresa) y lo que se le pide a la IA.
+# Todo esto sale a otra IA: nada de datos personales.
+PERFIL_IA = """LUMAK SOLUTIONS S.A.S., Bogotá, en el régimen SIMPLE.
+Qué hacemos: sistemas de información a la medida (aplicaciones web, integraciones, automatización, analítica), con soporte y mantenimiento mensual, SaaS y nube. La capacitación es una línea secundaria.
+Clientes: entidades públicas pequeñas por SECOP II y privados (cajas de compensación, universidades, cooperativas, clínicas).
+Cuántos somos: una persona, el representante legal, que desarrolla el software. Sin empleados; si un proyecto lo pide, sumamos un contratista.
+Objetivo: ganar contratos pequeños de software que podamos ejecutar y que nos dejen experiencia certificable.
+Dónde competimos hoy: mínima cuantía y régimen especial con ofertas. Aún no tenemos RUP y llevamos menos de un año constituidos, así que tampoco aplican los procesos limitados a MiPyME.
+No es lo nuestro: hardware y equipos, venta o renovación de licencias de marca, medios y publicidad, obras e interventoría."""
+PREGUNTA_IA = """## Qué necesito
+Lee la invitación, los estudios previos y los anexos del proceso, y respóndeme en español sencillo:
+1. Qué quieren contratar y qué hay que entregar, en pocas líneas.
+2. ¿Encaja con lo que hacemos y con nuestro objetivo? Sí, no o dudoso, y por qué.
+3. Requisitos habilitantes que no cumplimos: experiencia, RUP, MiPyME, personal, garantías, visitas u otros.
+4. Riesgos: marca o producto específico, hardware, plazo corto o alcance que no se ve en el título.
+5. Tu recomendación en una línea: ofertar o no.
+No inventes: si no pudiste abrir un documento, dilo y pídemelo."""
 
 
 def _plain(text):
@@ -173,6 +201,14 @@ class CrmLead(models.Model):
     secop_cierre_label = fields.Char("Cierre", compute="_compute_secop_cierre")
     secop_presupuesto_corto = fields.Char("Presupuesto", compute="_compute_secop_presupuesto_corto")
     secop_es_licitacion = fields.Boolean(compute="_compute_secop_es_licitacion")
+    secop_siguiente_paso = fields.Char("Siguiente paso", compute="_compute_secop_siguiente_paso")
+    secop_prompt_ia = fields.Text("Pregunta para la IA", compute="_compute_secop_prompt_ia")
+
+    @api.depends("stage_id", "won_status")
+    def _compute_secop_siguiente_paso(self):
+        pasos = {self.env.ref(xmlid).id: texto for xmlid, texto in SIGUIENTE_PASO.items()}
+        for lead in self:
+            lead.secop_siguiente_paso = pasos.get(lead.stage_id.id, "") if lead.won_status != "lost" else ""
 
     @api.depends("date_deadline", "secop_hora_cierre", "won_status")
     def _compute_secop_cierre(self):
@@ -231,6 +267,34 @@ class CrmLead(models.Model):
         self.ensure_one()
         return {"type": "ir.actions.act_url", "url": self.secop_url, "target": "new"}
 
+    @api.depends("name", "partner_id", "secop_id", "secop_url", "secop_modalidad", "expected_revenue", "date_deadline",
+                 "secop_hora_cierre")
+    @api.depends_context("company")
+    def _compute_secop_prompt_ia(self):
+        """La pregunta que «Preguntar a la IA» copia: la empresa, el proceso y qué revisar, para pegarla en cualquier IA."""
+        empresa = self.env.company
+        experiencia = "\n".join(
+            f"- {e.objeto} · {e.contratante_id.name}" + (f" · {monto_corto(e.valor)}" if e.valor else "")
+            + (f" · terminó el {e.fecha_fin:%d/%m/%Y}" if e.fecha_fin else "") + (" (del socio)" if e.de_socio else "")
+            for e in self.env["lumak.experiencia"].search([])) or "- Ninguna registrada todavía."
+        constituida = f"Constituida el {empresa.lumak_fecha_constitucion:%d/%m/%Y}.\n" if empresa.lumak_fecha_constitucion else ""
+        modalidades = dict(MODALIDADES)
+        for lead in self:
+            cierre = lead.date_deadline and f"{lead.date_deadline:%d/%m/%Y}" + (
+                f" {_hora_texto(lead.secop_hora_cierre)}" if lead.secop_hora_cierre else "")
+            datos = [("Objeto", lead.name), ("Entidad", lead.partner_id.name), ("ID", lead.secop_id),
+                     ("Modalidad", modalidades.get(lead.secop_modalidad)),
+                     ("Presupuesto oficial", monto_corto(lead.expected_revenue)), ("Cierre", cierre),
+                     ("Enlace en SECOP II", lead.secop_url)]
+            captcha = (f"\n- Si SECOP pide captcha, usa los datos abiertos: {SECOP_URL}?id_del_proceso={lead.secop_id} "
+                       "trae el id_del_portafolio, y con él los documentos salen en "
+                       "https://www.datos.gov.co/resource/dmgg-8hin.json?proceso=<id_del_portafolio>.") if lead.secop_id else ""
+            lead.secop_prompt_ia = (
+                "Actúa como asesor de contratación pública en Colombia. Quiero saber si este proceso de SECOP II encaja "
+                "con mi empresa y si vale la pena presentar oferta.\n\n"
+                f"## Mi empresa\n{empresa.lumak_perfil_ia or ''}\n{constituida}Experiencia que podemos acreditar:\n{experiencia}\n\n"
+                "## El proceso\n" + "\n".join(f"- {k}: {v}" for k, v in datos if v) + captcha + f"\n\n{PREGUNTA_IA}")
+
     @api.model
     def action_secop_pipeline(self, filtro=None):
         """Tablero del CRM solo con el equipo «Licitaciones SECOP», con sus vistas propias."""
@@ -243,16 +307,22 @@ class CrmLead(models.Model):
         for key in ("id", "xml_id", "path", "display_name", "view_id"):
             action.pop(key, None)
         action.update({
-            "name": _("Cierran esta semana") if filtro == "semana" else _("Licitaciones SECOP"),
+            "name": _("Cierran esta semana") if filtro == "semana" else _("Mis procesos"),
             "domain": [("type", "=", "opportunity"), ("team_id", "=", team.id)] + extra,
             "context": {"default_type": "opportunity", "default_team_id": team.id},
             "view_mode": "kanban,list,calendar,form,activity",
             "views": [(self.env.ref("lumak_secop.crm_lead_kanban_secop").id, "kanban"),
                       (self.env.ref("lumak_secop.crm_lead_list_secop").id, "list"),
                       (self.env.ref("lumak_secop.crm_lead_calendar_secop").id, "calendar"),
-                      (False, "form"), (False, "activity")],
+                      (self.env.ref("lumak_secop.crm_lead_form_secop").id, "form"), (False, "activity")],
         })
         return action
+
+    def _secop_accion_ficha(self):
+        """Abrir un proceso con la ficha de SECOP (sin los campos genéricos del CRM)."""
+        self.ensure_one()
+        return {"type": "ir.actions.act_window", "res_model": "crm.lead", "res_id": self.id, "view_mode": "form",
+                "views": [(self.env.ref("lumak_secop.crm_lead_form_secop").id, "form")], "target": "current"}
 
     @api.model
     def get_secop_dashboard(self):
@@ -264,8 +334,10 @@ class CrmLead(models.Model):
         semana = activos.filtered(lambda l: l.date_deadline and hoy <= l.date_deadline <= hoy + timedelta(days=7))
         todos = self.with_context(active_test=False)
         ganados = todos.search_count(base + [("won_status", "=", "won")])
-        perdidos = todos.search_count(base + [("won_status", "=", "lost")])
-        con_precio = todos.search(base + [("won_status", "=", "lost"), ("secop_precio_ganador", ">", 0), ("expected_revenue", ">", 0)])
+        # Perdido cuenta solo si ofertamos: se marca perdido desde «Presentada». Lo descartado al revisar no es derrota
+        perdido = base + [("won_status", "=", "lost"), ("stage_id", "=", self.env.ref("lumak_secop.stage_presentada").id)]
+        perdidos = todos.search_count(perdido)
+        con_precio = todos.search(perdido + [("secop_precio_ganador", ">", 0), ("expected_revenue", ">", 0)])
         descuentos = [1 - l.secop_precio_ganador / l.expected_revenue for l in con_precio]
         conteo = {stage.id: total for stage, total in self._read_group(base + [("won_status", "=", "pending")], ["stage_id"], ["__count"])}
         etapas = self.env["crm.stage"].search([("team_ids", "in", team.ids), ("is_won", "=", False)])
@@ -285,6 +357,15 @@ class CrmLead(models.Model):
                 "modalidad": dict(MODALIDADES).get(l.secop_modalidad, ""),
             } for l in activos.filtered("date_deadline").sorted("date_deadline")[:6]],
         }
+
+
+class ResCompany(models.Model):
+    _inherit = "res.company"
+
+    # Al crear la columna, Odoo llena la empresa existente con el perfil de arranque; de ahí en adelante lo edita el usuario
+    lumak_perfil_ia = fields.Text("Perfil para preguntar a la IA", default=PERFIL_IA,
+                                  help="Lo que hace la empresa, cuántos son y qué buscan. «Preguntar a la IA» lo copia en "
+                                       "cada proceso: sin datos personales.")
 
 
 class CrmTeam(models.Model):
@@ -324,5 +405,4 @@ class LumakSecopImport(models.TransientModel):
         lead = self.env["crm.lead"].search([("secop_id", "=", row["id_del_proceso"])], limit=1)
         if not lead:
             lead = self.env["crm.lead"].create({**lead_vals_from_row(self.env, row), "partner_id": secop_partner(self.env, row).id})
-        return {"type": "ir.actions.act_window", "res_model": "crm.lead", "res_id": lead.id,
-                "view_mode": "form", "views": [(False, "form")], "target": "current"}
+        return lead._secop_accion_ficha()

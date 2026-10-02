@@ -116,6 +116,9 @@ $lumak-urgencia: (
 // --- Tablero de Licitaciones ---------------------------------------------------------------
 .o_lumak_dashboard {
     background: $lumak-paper;
+    // Odoo sizes the action wrapper, not this client action inside it: without a height the
+    // tablero grows with its content and the wrapper clips it, so nothing below the fold scrolls
+    height: 100%;
     overflow: auto;
     color: $lumak-ink;
 
@@ -371,6 +374,34 @@ $lumak-urgencia: (
         strong { font-size: 1.35rem; }
     }
 
+    // Automático: un punto verde si corrió a tiempo, ámbar si está atrasado (el color solo marca urgencia)
+    .o_lumak_auto {
+        display: flex;
+        align-items: flex-start;
+        gap: .6rem;
+        padding: .35rem 0;
+    }
+    .o_lumak_auto_dot {
+        flex: none;
+        width: .55rem;
+        height: .55rem;
+        margin-top: .45rem;
+        border-radius: 50%;
+    }
+    .o_lumak_auto_ok { background: #2E7D5B; }
+    .o_lumak_auto_tarde { background: $lumak-amber; }
+    .o_lumak_auto_name { display: block; font-weight: 600; font-size: .9rem; }
+    .o_lumak_auto > span:last-child { min-width: 0; }
+    .o_lumak_auto .o_lumak_row_meta { white-space: normal; }
+
+    .o_lumak_links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: .6rem;
+        .btn-link { padding: 0; font-size: .85rem; font-weight: 600; color: $lumak-ink-soft; }
+    }
+
     .o_lumak_muted, .o_lumak_empty { color: $lumak-muted; line-height: 1.5; margin: 0; }
     .o_lumak_empty p + p { margin-top: .4rem; }
 
@@ -390,3 +421,6 @@ $lumak-urgencia: (
         .o_lumak_chip { grid-column: 1 / -1; }
     }
 }
+
+// Ficha de un proceso: el siguiente paso, en una franja discreta
+.o_lumak_siguiente { margin: .5rem 0 1rem; padding: .6rem .9rem; }

@@ -127,12 +127,13 @@ Un documento **no** se puede subsanar si da puntaje, si sirve para comparar ofer
 
 El recorrido completo, de la importación a la experiencia certificada, está en `plan-operacion-lumak.md`, sección 3. En corto:
 
-- **App Lumak:** el tablero de toda la empresa (cierres, contratos, cartera, kit y fechas legales), el kit de documentos, la experiencia, las fechas de la empresa y los datos del representante legal.
-- **CRM → Licitaciones:** procesos SECOP (tarjetas, lista y calendario de cierres) e «Importar desde SECOP». Un proceso = una oportunidad del equipo «Licitaciones SECOP», con etapas Detectado → Evaluando → Preparando oferta → Oferta presentada → En evaluación → Adjudicado.
+- **Todo SECOP está en la app Lumak**, en el orden en que se trabaja: Tablero · Todo lo publicado · Mis procesos · Contratos · Por cobrar · Mercado · Empresa (kit, experiencia, fechas y datos del representante legal).
+- **Mis procesos:** un proceso = una oportunidad del equipo «Licitaciones SECOP», con 4 etapas: Por revisar → Preparando oferta → Presentada → Adjudicado («Perdido» en cualquier momento). La ficha muestra solo lo de SECOP y el siguiente paso.
 - **Solo, al cambiar de etapa:**
-  - «Preparando oferta» crea la cotización (la oferta económica) y agenda el plan de 8 pasos contados desde el cierre.
-  - «Oferta presentada» agenda el plan «Después del cierre».
-  - «Adjudicado» confirma la cotización y abre el proyecto del contrato desde la plantilla, con su hito de pago.
+  - «Preparando oferta» crea la cotización (la oferta económica) y 4 actividades obligatorias contadas desde el cierre: kit y formatos, precio, documentos firmados, presentar.
+  - «Presentada» agenda revisar el informe y subsanar.
+  - «Adjudicado» confirma la cotización y abre el proyecto del contrato desde la plantilla, con su objetivo de pago.
+  - «Perdido» borra lo pendiente y cancela la cotización en borrador.
 - **Botón «Preparar documentos de la oferta»:** carta, oferta económica, aportes, anticorrupción, inhabilidades y experiencia, más el kit vigente al cierre, en un ZIP.
 - **Calendario:** el cierre y el límite de observaciones de cada proceso abierto, con recordatorio.
 

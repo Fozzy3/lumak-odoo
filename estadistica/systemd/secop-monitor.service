@@ -6,5 +6,5 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 WorkingDirectory=%h/Documents/repos/odoo/estadistica
-# Odoo tiene que estar corriendo (docker compose up -d en la carpeta odoo)
+# Odoo tiene que estar corriendo (docker compose up -d en la carpeta odoo). La clave de API la lee de ~/.config/lumak/odoo.env
 ExecStart=%h/.local/bin/uv run --quiet python -m secop_estadistica monitor

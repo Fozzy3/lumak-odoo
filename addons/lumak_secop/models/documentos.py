@@ -139,9 +139,9 @@ class CrmLead(models.Model):
     def _secop_datos_faltantes(self):
         company = self.company_id or self.env.company
         faltan = [texto for valor, texto in [
-            (company.lumak_representante, _("nombre del representante legal (Lumak → Datos de la empresa)")),
-            (company.lumak_representante_cc, _("cédula del representante legal (Lumak → Datos de la empresa)")),
-            (company.lumak_fecha_constitucion, _("fecha de constitución (Lumak → Datos de la empresa)")),
+            (company.lumak_representante, _("nombre del representante legal (Lumak → Empresa → Datos de la empresa)")),
+            (company.lumak_representante_cc, _("cédula del representante legal (Lumak → Empresa → Datos de la empresa)")),
+            (company.lumak_fecha_constitucion, _("fecha de constitución (Lumak → Empresa → Datos de la empresa)")),
             (company.street and company.city, _("dirección de la compañía")),
             (company.email, _("correo de la compañía")),
             (company.phone, _("teléfono de la compañía")),

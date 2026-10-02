@@ -58,6 +58,14 @@ class CrmLead(models.Model):
         for lead in self.filtered(lambda l: l.secop_es_licitacion and l.stage_id.is_won):
             lead._secop_confirmar_contrato()
 
+    def action_set_lost(self, **additional_values):
+        # Un proceso perdido no deja pendientes ni una cotización abierta que confundan después
+        res = super().action_set_lost(**additional_values)
+        secop = self.filtered("secop_es_licitacion")
+        secop.activity_ids.unlink()
+        secop.order_ids.filtered(lambda o: o.state in ("draft", "sent"))._action_cancel()
+        return res
+
     def _secop_crear_cotizacion(self):
         """Borrador de la oferta económica: una línea con el objeto del proceso, al tope del presupuesto."""
         self.ensure_one()

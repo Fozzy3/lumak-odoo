@@ -25,20 +25,16 @@ export class SecopDashboard extends Component {
         this.action.doAction(action);
     }
 
-    openImport() {
-        this.action.doAction("lumak_secop.action_secop_import");
-    }
-
     openContrato(id) {
         this.action.doAction({ type: "ir.actions.act_window", res_model: "project.project", res_id: id, views: [[false, "form"]] });
     }
 
     openFacturas() {
-        this.action.doAction({
-            type: "ir.actions.act_window", name: "Por cobrar", res_model: "account.move",
-            domain: [["move_type", "=", "out_invoice"], ["state", "=", "posted"], ["payment_state", "in", ["not_paid", "partial"]]],
-            context: { default_move_type: "out_invoice" }, views: [[false, "list"], [false, "form"]],
-        });
+        this.action.doAction("lumak_secop.action_lumak_por_cobrar");
+    }
+
+    openMercado(vista) {
+        this.action.doAction(`lumak_secop.action_lumak_secop_${vista}`);
     }
 
     openKit() {
@@ -54,7 +50,10 @@ export class SecopDashboard extends Component {
     }
 
     openLead(id) {
-        this.action.doAction({ type: "ir.actions.act_window", res_model: "crm.lead", res_id: id, views: [[false, "form"]] });
+        this.action.doAction({
+            type: "ir.actions.act_window", res_model: "crm.lead", res_id: id, views: [[false, "form"]],
+            context: { form_view_ref: "lumak_secop.crm_lead_form_secop" },
+        });
     }
 }
 

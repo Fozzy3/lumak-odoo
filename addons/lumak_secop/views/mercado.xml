@@ -1,0 +1,253 @@
+<odoo>
+    <!-- Mercado SECOP: lo publicado (para buscar a mano), estadísticas y competidores. Datos del monitor diario, solo lectura -->
+    <record id="view_lumak_secop_proceso_list" model="ir.ui.view">
+        <field name="name">lumak.secop.proceso.list</field>
+        <field name="model">lumak.secop.proceso</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" delete="0" decoration-muted="fecha_cierre and fecha_cierre &lt; current_date"
+                  js_class="lumak_publicados_list">
+                <header>
+                    <button name="%(action_secop_import)d" type="action" string="Importar con enlace" display="always"
+                            class="btn-secondary"/>
+                </header>
+                <field name="fecha_publicacion"/>
+                <field name="fecha_cierre"/>
+                <field name="entidad" width="220px"/>
+                <field name="nombre"/>
+                <field name="departamento" optional="show"/>
+                <field name="presupuesto"/>
+                <field name="n_ofertas" optional="show"/>
+                <field name="ganador" optional="hide"/>
+                <field name="descuento_ganador" optional="hide"/>
+                <field name="nicho" optional="show" width="80px"/>
+                <field name="lead_id" optional="show"/>
+                <button name="action_traer_al_flujo" type="object" string="Traer a mi flujo" icon="fa-plus" invisible="lead_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lumak_secop_proceso_form" model="ir.ui.view">
+        <field name="name">lumak.secop.proceso.form</field>
+        <field name="model">lumak.secop.proceso</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0" delete="0">
+                <header>
+                    <button name="action_traer_al_flujo" type="object" string="Traer a mi flujo" class="btn-primary" invisible="lead_id"/>
+                    <button name="action_traer_al_flujo" type="object" string="Ver en mi flujo" invisible="not lead_id"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="nombre"/>
+                        <h1><field name="nombre"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="entidad"/>
+                            <field name="departamento"/>
+                            <field name="ciudad"/>
+                            <field name="modalidad"/>
+                            <field name="referencia"/>
+                            <field name="url" widget="url" text="Abrir en SECOP"/>
+                        </group>
+                        <group>
+                            <field name="presupuesto"/>
+                            <field name="fecha_publicacion"/>
+                            <field name="fecha_cierre"/>
+                            <field name="estado"/>
+                            <field name="nicho"/>
+                            <field name="lead_id" invisible="not lead_id"/>
+                        </group>
+                    </group>
+                    <group string="Resultado" invisible="not n_ofertas">
+                        <group>
+                            <field name="n_ofertas"/>
+                            <field name="ganador"/>
+                        </group>
+                        <group>
+                            <field name="precio_ganador"/>
+                            <field name="descuento_ganador"/>
+                        </group>
+                    </group>
+                    <field name="oferta_ids" invisible="not oferta_ids">
+                        <list>
+                            <field name="puesto"/>
+                            <field name="proveedor"/>
+                            <field name="nit"/>
+                            <field name="valor"/>
+                            <field name="descuento"/>
+                            <field name="gano" widget="boolean" string="Ganó"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lumak_secop_proceso_search" model="ir.ui.view">
+        <field name="name">lumak.secop.proceso.search</field>
+        <field name="model">lumak.secop.proceso</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="nombre"/>
+                <field name="entidad"/>
+                <field name="departamento"/>
+                <field name="ganador"/>
+                <field name="referencia"/>
+                <filter name="abiertos" string="Reciben ofertas" domain="[('fecha_cierre', '&gt;=', 'today')]"/>
+                <separator/>
+                <filter name="semana" string="Publicados esta semana" domain="[('fecha_publicacion', '&gt;=', 'today -7d')]"/>
+                <separator/>
+                <filter name="nicho" string="Del nicho" domain="[('nicho', '=', True)]"/>
+                <separator/>
+                <filter name="fuera_flujo" string="Fuera de mi flujo" domain="[('lead_id', '=', False)]"/>
+                <separator/>
+                <filter name="adjudicados" string="Con ganador" domain="[('ganador', '!=', False)]"/>
+                <separator/>
+                <filter name="tres_anios" string="Últimos 3 años" domain="[('fecha_publicacion', '&gt;=', 'today -3y')]"/>
+                <group>
+                    <filter name="por_anio" string="Año" context="{'group_by': 'fecha_publicacion:year'}"/>
+                    <filter name="por_entidad" string="Entidad" context="{'group_by': 'entidad'}"/>
+                    <filter name="por_departamento" string="Departamento" context="{'group_by': 'departamento'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_lumak_secop_proceso_pivot" model="ir.ui.view">
+        <field name="name">lumak.secop.proceso.pivot</field>
+        <field name="model">lumak.secop.proceso</field>
+        <field name="arch" type="xml">
+            <pivot string="Estadísticas de SECOP" disable_linking="0">
+                <field name="fecha_publicacion" interval="year" type="row"/>
+                <field name="n_ofertas" type="measure"/>
+                <field name="descuento_ganador" type="measure"/>
+                <field name="presupuesto" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_lumak_secop_proceso_graph" model="ir.ui.view">
+        <field name="name">lumak.secop.proceso.graph</field>
+        <field name="model">lumak.secop.proceso</field>
+        <field name="arch" type="xml">
+            <graph string="Procesos por año" type="bar">
+                <field name="fecha_publicacion" interval="year"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_lumak_secop_publicados" model="ir.actions.act_window">
+        <field name="name">Todo lo publicado</field>
+        <field name="res_model">lumak.secop.proceso</field>
+        <field name="view_mode">list,form,pivot,graph</field>
+        <field name="context">{'search_default_abiertos': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aún no llegan procesos</p>
+            <p>El monitor diario de SECOP (7:30 a. m.) trae aquí la mínima cuantía de TIC de los últimos 60 días y todo el histórico del nicho.</p>
+        </field>
+    </record>
+
+    <record id="action_lumak_secop_estadisticas" model="ir.actions.act_window">
+        <field name="name">Estadísticas de SECOP</field>
+        <field name="res_model">lumak.secop.proceso</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="context">{'search_default_nicho': 1, 'search_default_adjudicados': 1,
+                                   'pivot_measures': ['__count', 'n_ofertas', 'descuento_ganador', 'presupuesto']}</field>
+        <field name="help" type="html">
+            <p>Procesos del nicho con ganador, por año. Cambia las filas a entidad o departamento, o agrega medidas.
+               El descuento solo cuenta los procesos con valores confiables.</p>
+        </field>
+    </record>
+
+    <!-- Competidores: las ofertas agrupadas por proveedor -->
+    <record id="view_lumak_secop_oferta_list" model="ir.ui.view">
+        <field name="name">lumak.secop.oferta.list</field>
+        <field name="model">lumak.secop.oferta</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" delete="0">
+                <field name="fecha_publicacion"/>
+                <field name="proceso_id"/>
+                <field name="entidad" optional="show"/>
+                <field name="proveedor"/>
+                <field name="valor"/>
+                <field name="puesto"/>
+                <field name="descuento"/>
+                <field name="gano" widget="boolean" string="Ganó"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lumak_secop_oferta_pivot" model="ir.ui.view">
+        <field name="name">lumak.secop.oferta.pivot</field>
+        <field name="model">lumak.secop.oferta</field>
+        <field name="arch" type="xml">
+            <pivot string="Competidores" default_order="gano desc">
+                <field name="proveedor" type="row"/>
+                <field name="gano" type="measure"/>
+                <field name="tasa_exito" type="measure"/>
+                <field name="descuento" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_lumak_secop_oferta_search" model="ir.ui.view">
+        <field name="name">lumak.secop.oferta.search</field>
+        <field name="model">lumak.secop.oferta</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="proveedor"/>
+                <field name="nit"/>
+                <field name="entidad"/>
+                <field name="departamento"/>
+                <filter name="nicho" string="Del nicho" domain="[('nicho', '=', True)]"/>
+                <separator/>
+                <filter name="dos_anios" string="Últimos 2 años" domain="[('fecha_publicacion', '&gt;=', 'today -2y')]"/>
+                <separator/>
+                <filter name="ganadas" string="Ganadas" domain="[('gano', '=', 1)]"/>
+                <group>
+                    <filter name="por_proveedor" string="Proveedor" context="{'group_by': 'proveedor'}"/>
+                    <filter name="por_entidad" string="Entidad" context="{'group_by': 'entidad'}"/>
+                    <filter name="por_departamento" string="Departamento" context="{'group_by': 'departamento'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_lumak_secop_competidores" model="ir.actions.act_window">
+        <field name="name">Competidores en SECOP</field>
+        <field name="res_model">lumak.secop.oferta</field>
+        <field name="view_mode">pivot,list</field>
+        <field name="context">{'search_default_nicho': 1, 'search_default_dos_anios': 1,
+                                   'pivot_measures': ['__count', 'gano', 'tasa_exito', 'descuento']}</field>
+        <field name="help" type="html">
+            <p>Quién oferta en el nicho, cuántas gana, su tasa de éxito y su descuento promedio.
+               Clic en el título de una medida para ordenar; clic en una celda para ver las ofertas.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_lumak_publicados" name="Todo lo publicado" parent="menu_lumak_root" action="action_lumak_secop_publicados" sequence="2"/>
+    <menuitem id="menu_lumak_mercado" name="Mercado" parent="menu_lumak_root" sequence="6"/>
+    <menuitem id="menu_lumak_estadisticas" name="Estadísticas" parent="menu_lumak_mercado" action="action_lumak_secop_estadisticas" sequence="2"/>
+    <menuitem id="menu_lumak_competidores" name="Competidores" parent="menu_lumak_mercado" action="action_lumak_secop_competidores" sequence="3"/>
+
+    <!-- Estrategia: qué tiene la competencia y cómo ganarle. Una página editable que arranca con el análisis del 29 sep 2026 -->
+    <record id="res_company_form_estrategia" model="ir.ui.view">
+        <field name="name">res.company.form.estrategia</field>
+        <field name="model">res.company</field>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <form string="Estrategia" create="0" delete="0">
+                <sheet>
+                    <field name="lumak_estrategia" nolabel="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="action_lumak_estrategia" model="ir.actions.server">
+        <field name="name">Estrategia</field>
+        <field name="model_id" ref="base.model_res_company"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_lumak_estrategia()</field>
+    </record>
+    <menuitem id="menu_lumak_estrategia" name="Estrategia" parent="menu_lumak_mercado" action="action_lumak_estrategia" sequence="4"/>
+</odoo>

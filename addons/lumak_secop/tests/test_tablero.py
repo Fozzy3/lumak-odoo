@@ -76,10 +76,38 @@ class TestInicio(TransactionCase):
         self.assertEqual(primera, app, "al entrar, Odoo abre la primera app")
 
     def test_company_assets_live_in_the_lumak_app(self):
-        app = self.env.ref("lumak_secop.menu_lumak_root")
+        empresa = self.env.ref("lumak_secop.menu_lumak_empresa_grupo")
+        self.assertEqual(empresa.parent_id, self.env.ref("lumak_secop.menu_lumak_root"))
         for xmlid in ("menu_secop_kit", "menu_secop_experiencia", "menu_lumak_fechas", "menu_lumak_empresa"):
-            self.assertEqual(self.env.ref(f"lumak_secop.{xmlid}").parent_id, app)
+            self.assertEqual(self.env.ref(f"lumak_secop.{xmlid}").parent_id, empresa)
         fechas = self.env.ref("lumak_secop.action_lumak_fechas")
         self.assertIn("obligacion", fechas.domain)
         empresa = self.env["res.company"].action_lumak_datos_empresa()
         self.assertEqual((empresa["res_model"], empresa["res_id"]), ("res.company", self.env.company.id))
+
+
+class TestAutomatizaciones(TransactionCase):
+    """El tablero muestra si corrieron el monitor diario, la base histórica y el respaldo (corren fuera de Odoo)."""
+
+    def test_each_job_reports_and_the_dashboard_says_when_it_last_ran(self):
+        Lead = self.env["crm.lead"]
+        for clave in ("monitor", "historico", "respaldo"):
+            self.env["ir.config_parameter"].sudo().set_param(f"lumak_secop.auto_{clave}", False)
+        antes = {a["clave"]: a for a in Lead.get_secop_dashboard()["automatizaciones"]}
+        self.assertEqual(list(antes), ["monitor", "historico", "respaldo"])
+        self.assertFalse(antes["monitor"]["ok"])
+        self.assertIn("no ha corrido", antes["monitor"]["cuando"])
+        Lead.secop_registrar_automatizacion("monitor", "3 nuevos · 8 con precio")
+        despues = {a["clave"]: a for a in Lead.get_secop_dashboard()["automatizaciones"]}
+        self.assertTrue(despues["monitor"]["ok"])
+        self.assertEqual(despues["monitor"]["detalle"], "3 nuevos · 8 con precio")
+        self.assertIn("hoy", despues["monitor"]["cuando"])
+        with self.assertRaises(ValueError):
+            Lead.secop_registrar_automatizacion("otra_cosa", "x")
+
+    def test_a_job_that_did_not_run_in_time_shows_as_late(self):
+        import json
+        viejo = (fields.Datetime.now() - timedelta(days=3)).isoformat(timespec="seconds")
+        self.env["ir.config_parameter"].sudo().set_param("lumak_secop.auto_respaldo", json.dumps({"fecha": viejo, "detalle": "5 MB"}))
+        respaldo = {a["clave"]: a for a in self.env["crm.lead"].get_secop_dashboard()["automatizaciones"]}["respaldo"]
+        self.assertFalse(respaldo["ok"], "el respaldo es diario: 3 días es atraso")

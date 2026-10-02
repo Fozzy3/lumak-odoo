@@ -1,0 +1,9 @@
+[Unit]
+Description=Respaldo diario del Odoo de Lumak, 7:00 p. m. (si el equipo estaba apagado, al prenderlo)
+
+[Timer]
+OnCalendar=*-*-* 19:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target

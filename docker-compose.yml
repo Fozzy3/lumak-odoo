@@ -1,28 +1,42 @@
-# Odoo 19 Community local para Lumak. Solo para pruebas en este equipo.
+# Odoo 19 Community de Lumak, en producción en este equipo (docs/salida-a-produccion.md).
+# Secretos fuera de git: .env (clave de la base y del túnel) y config/odoo.conf (clave maestra).
+# Imágenes fijas por digest: se actualizan a propósito, con respaldo antes (ver la guía).
 services:
   db:
-    image: postgres:17
+    image: postgres:17@sha256:d74eeac9a635390a49bc21bd49fccd973de707e2a53a76ac49b552b8712ec46f
     environment:
       POSTGRES_DB: postgres
       POSTGRES_USER: odoo
-      POSTGRES_PASSWORD: odoo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?falta POSTGRES_PASSWORD en .env}
     volumes:
       - db-data:/var/lib/postgresql/data
     restart: unless-stopped
 
   odoo:
-    image: odoo:19.0
+    image: odoo:19.0@sha256:144175ec0039d52daff1d79f7e51c9281ca3c98b96c830feb49d09764a9f5d7c
     depends_on:
       - db
     ports:
-      - "127.0.0.1:8069:8069" # solo accesible desde este equipo
+      - "127.0.0.1:8069:8069" # desde fuera solo por el túnel
     environment:
       HOST: db
       USER: odoo
-      PASSWORD: odoo
+      PASSWORD: ${POSTGRES_PASSWORD:?falta POSTGRES_PASSWORD en .env}
     volumes:
       - odoo-data:/var/lib/odoo
       - ./addons:/mnt/extra-addons
+      - ./config/odoo.conf:/etc/odoo/odoo.conf:ro
+    restart: unless-stopped
+
+  # Acceso desde otros equipos con HTTPS (Cloudflare Tunnel, gratis). Se prende con: docker compose --profile tunel up -d
+  tunel:
+    image: cloudflare/cloudflared:2026.9.3@sha256:072c067d25ccbe61d46e18f0d0723255f2bb5304f7317caa95b27031520ff92c
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on:
+      - odoo
+    profiles: [tunel]
     restart: unless-stopped
 
 volumes:

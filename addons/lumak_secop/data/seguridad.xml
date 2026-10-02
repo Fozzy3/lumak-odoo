@@ -1,0 +1,6 @@
+<odoo>
+    <!-- Producción: cuentas solo por invitación (nadie se registra solo). El mínimo de 8 caracteres en las contraseñas
+         lo pone auth_password_policy; con doble factor basta (NIST SP 800-63B-4).
+         ponytail: sin noupdate, cada actualización lo vuelve a imponer; para cambiarlo, cambiar este archivo -->
+    <function model="ir.config_parameter" name="set_param" eval="('auth_signup.invitation_scope', 'b2b')"/>
+</odoo>

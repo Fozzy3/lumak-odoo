@@ -32,7 +32,7 @@
             <p>Sube el PDF y la fecha de expedición: Odoo avisa cuándo vence y los junta al preparar cada oferta.</p>
         </field>
     </record>
-    <menuitem id="menu_secop_kit" name="Kit de la empresa" parent="menu_lumak_root" action="action_lumak_documento" sequence="2"/>
+    <menuitem id="menu_secop_kit" name="Kit de la empresa" parent="menu_lumak_empresa_grupo" action="action_lumak_documento" sequence="1"/>
 
     <!-- Atajo a los datos que usan los documentos (representante, cédula, dirección) -->
     <record id="action_lumak_datos_empresa" model="ir.actions.server">
@@ -41,7 +41,7 @@
         <field name="state">code</field>
         <field name="code">action = model.action_lumak_datos_empresa()</field>
     </record>
-    <menuitem id="menu_lumak_empresa" name="Datos de la empresa" parent="menu_lumak_root" action="action_lumak_datos_empresa" sequence="5"/>
+    <menuitem id="menu_lumak_empresa" name="Datos de la empresa" parent="menu_lumak_empresa_grupo" action="action_lumak_datos_empresa" sequence="4"/>
 
     <!-- Datos del representante legal para los documentos -->
     <record id="res_company_form_lumak" model="ir.ui.view">
@@ -67,6 +67,8 @@
                             <field name="lumak_contador_tp"/>
                         </group>
                     </group>
+                    <separator string="Perfil para «Preguntar a la IA»"/>
+                    <field name="lumak_perfil_ia" nolabel="1"/>
                 </page>
             </page>
         </field>

@@ -31,13 +31,25 @@ uv run pytest                                                      # pruebas
 | SECOPII - Ofertas Por Proceso Histórico | `b28v-edj8` | Lo mismo para años anteriores |
 | SECOP II - Contratos Electrónicos | `jbjy-vk9h` | Contrato firmado: valor, estado, fechas, si el proveedor es pyme |
 
-**Qué entra:**
+**Qué entra en el histórico (carga semanal):**
 - Mínima cuantía en los segmentos UNSPSC 43 (equipos y software) y 81 (servicios de TI).
 - En los segmentos 80, 82 y 84, los procesos que nombran software, sistema de información, aplicativo, plataforma, página web, portal, chatbot o inteligencia artificial.
 
-**El nicho de Lumak** (columna `nicho`) sale del clasificador del estudio de mercado de septiembre de 2026:
-- entran software a la medida, soporte de software, web, analítica, IA y automatización;
-- quedan fuera hardware, licencias, conectividad y publicidad.
+**El monitor diario no usa ese filtro por palabras.** Pide a SECOP todo lo abierto en mínima cuantía y régimen especial (unos 450 procesos) y decide el clasificador. Desde el 30 sep 2026: el filtro por palabras botaba procesos del nicho, como uno de Envigado por $113 M.
+
+**El nicho de Lumak** (columna `nicho`) sale del clasificador del estudio de mercado de septiembre de 2026, ampliado el 30 sep 2026:
+- entran software a la medida, soporte de software, web, analítica, IA, automatización y software en arriendo o SaaS;
+- quedan fuera hardware, licencias, conectividad, publicidad y los convenios de «aunar esfuerzos» (solo para entidades sin ánimo de lucro);
+- la capacitación en TIC o IA no es nicho (sus precios son otros), pero el monitor la trae con la etiqueta «⚠ Capacitación»;
+- el arriendo o SaaS llega con «⚠ Producto»: piden un software ya hecho;
+- la reventa de licencias, suscripciones, certificados y hosting tampoco es nicho, pero llega con «⚠ Reventa»: suelen pedir experiencia vendiendo lo mismo.
+
+Tras cambiar el clasificador, `reclasificar` vuelve a marcar el histórico sin descargar nada.
+
+**Ventajas (desde el 1 oct 2026).** Cada proceso nuevo llega a Odoo con lo que juega a favor de Lumak, una estrella por ventaja. El tablero ordena por estrellas.
+- «✓ Poca competencia»: la entidad suele recibir 0 o 1 ofertas, según su historia si tiene 3 procesos cerrados o más; si no, por su tipo (alcaldía, hospital, entidad nacional, universidad). En los 12 meses al 30 sep 2026, los marcados cerraron con 0 o 1 ofertas el 64 % de las veces; los demás, el 31 %.
+- «✓ Tu experiencia alcanza»: el presupuesto se cubre con la experiencia marcada «Va en el formato de experiencia» en *Empresa → Experiencia*. Solo para procesos del nicho.
+- «✓ Acepta experiencia de socios»: la invitación deja acreditar la experiencia de los socios. Se lee en los documentos, como el RUP.
 
 ## Tablas y vistas
 
@@ -71,17 +83,25 @@ uv run pytest                                                      # pruebas
 
 1. **Trae de SECOP los procesos abiertos del nicho.**
    - Modalidades: mínima cuantía y régimen especial con ofertas.
-   - Solo los publicados en los últimos 3 días que todavía reciben ofertas.
+   - Solo los que todavía reciben ofertas, publicados en los últimos 30 días (régimen especial queda abierto hasta unas 3 semanas).
    - Todos quedan también en la base.
-2. **Los crea en Odoo** en «Detectado», con el mismo importador del menú (entidad, presupuesto, cierre, plazo), y deja una nota. Si ya existen, no los duplica.
+2. **Los crea en Odoo** en «Por revisar», con el mismo importador del menú (entidad, presupuesto, cierre, plazo), y deja una nota. Si ya existen, no los duplica.
 3. **Calcula el precio para ganar** en todos los procesos SECOP abiertos de Odoo y lo escribe en la pestaña SECOP:
    - precio sugerido;
    - probabilidad de ganar;
    - análisis con opciones y competidores probables.
 
    Si pones el **costo estimado** del proceso, el análisis calcula la utilidad; sin costo, solo da la probabilidad por precio.
+4. **Llena *Todo lo publicado* y *Mercado* en Odoo** (`publicar`) con todo el nicho y todo lo publicado en los últimos 60 días, ofertas incluidas:
+   - **Todo lo publicado:** lo que aún recibe ofertas, para buscar a mano y traerlo al flujo con un botón;
+   - **Estadísticas:** tabla dinámica por año, entidad o departamento;
+   - **Competidores:** ofertas, ganadas, tasa de éxito y descuento de cada proveedor.
 
-Credenciales de Odoo: variables `LUMAK_ODOO_URL`, `LUMAK_ODOO_DB`, `LUMAK_ODOO_USUARIO` y `LUMAK_ODOO_CLAVE`. Por defecto son las del Odoo local.
+   Los descuentos van en % y quedan vacíos cuando SECOP trae valores dudosos.
+
+Credenciales de Odoo: `LUMAK_ODOO_USUARIO` y `LUMAK_ODOO_CLAVE`, una clave de API de carlos, en `~/.config/lumak/odoo.env`. Las herramientas leen ese archivo solas (a mano y en systemd); las variables de entorno, si están, mandan. `LUMAK_ODOO_URL` y `LUMAK_ODOO_DB` son opcionales.
+
+**Tablero de Odoo, sección «Automático»:** el monitor, la carga semanal y el respaldo avisan al terminar (`avisar`), y el tablero muestra cuándo corrieron. Si uno se atrasa (el equipo estuvo apagado), sale en ámbar.
 
 ## Precio para ganar (`precio.py`)
 

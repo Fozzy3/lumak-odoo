@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Lumak en Odoo – Guía de uso</title>
+<style>
+
+  /* Pensada para leer en el celular: página angosta y alta, una sola columna */
+  :root {
+    --ink: #1F2A44; --ink-soft: #3B4766; --amber: #E8A33D; --amber-soft: #FBF1DF;
+    --paper: #F4F1EC; --line: #E2DDD4; --muted: #5C6475; --red: #C2412D; --green: #2E7D5B;
+  }
+  @page { size: 90mm 160mm; margin: 6mm 5.5mm 8mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Noto Sans", sans-serif; font-size: 9.6pt; line-height: 1.5; color: var(--ink);
+    -webkit-hyphens: auto; hyphens: auto; }
+  h1, h2, h3 { line-height: 1.2; margin: 0; hyphens: manual; }
+  h2 { font-size: 14pt; letter-spacing: -.01em; margin: 0 0 3mm; break-after: avoid; }
+  h3 { font-size: 11pt; margin: 0; }
+  p { margin: 0 0 2mm; }
+  ul, ol { margin: 0 0 2mm; padding-left: 4.5mm; }
+  li { margin-bottom: .8mm; }
+  .muted { color: var(--muted); }
+  .break { break-before: page; }
+
+  .cover { display: flex; flex-direction: column; }
+  .cover-band { background: var(--ink); color: #fff; border-radius: 3mm; padding: 6mm 5mm 5mm; }
+  .cover-mark { display: inline-flex; align-items: center; justify-content: center; width: 10mm; height: 10mm;
+    border-radius: 2.4mm; background: var(--amber); color: var(--ink); font-weight: 800; font-size: 15pt; margin-bottom: 4mm; }
+  .cover h1 { font-size: 20pt; letter-spacing: -.02em; margin-bottom: 2mm; }
+  .cover-sub { font-size: 10pt; color: #D9DEEA; margin: 0; }
+  .cover-meta { margin-top: 4mm; font-size: 7.6pt; color: #AEB6C9; }
+  .cover-body { margin-top: 3mm; font-size: 9pt; }
+  .cover-body h3 { margin: 3mm 0 1.5mm; }
+
+  .chain { display: flex; flex-wrap: wrap; gap: 1.6mm 0; align-items: center; margin: 2mm 0 3mm; }
+  .chain span { background: var(--paper); border: 1px solid var(--line); border-radius: 99px; padding: .8mm 2.4mm; font-size: 8.4pt; font-weight: 600; }
+  .chain i { font-style: normal; color: var(--amber); font-weight: 800; padding: 0 1.2mm; }
+  .toc { display: grid; grid-template-columns: 5mm 1fr; gap: 1.5mm 0; }
+  .toc b { color: var(--amber); }
+
+  .case { break-inside: avoid; background: var(--amber-soft); border-left: 1mm solid var(--amber); border-radius: 2mm; padding: 3mm 3.5mm; margin: 0 0 5mm; }
+  .case p:last-child { margin: 0; }
+  .nums { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6mm; margin-top: 2.5mm; }
+  .nums div { background: #fff; border-radius: 2mm; padding: 1.8mm 2.4mm; }
+  .nums b { display: block; font-size: 12pt; }
+  .nums small { color: var(--muted); font-size: 7.6pt; }
+
+  .step { margin: 0 0 6mm; }
+  .step-head { display: flex; align-items: center; gap: 2.4mm; margin-bottom: 2mm; break-after: avoid; }
+  .step-num { flex: none; width: 7mm; height: 7mm; border-radius: 50%; background: var(--ink); color: #fff; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center; font-size: 9pt; }
+  .step-when { font-size: 7.8pt; color: var(--muted); font-weight: 600; margin-left: auto; white-space: nowrap; }
+  .who { margin: 0 0 2.5mm; }
+  .who div { border-left: 1mm solid var(--line); padding: .5mm 0 .5mm 2.6mm; margin-bottom: 2mm; break-inside: avoid; }
+  .who h4 { margin: 0 0 .6mm; font-size: 7.6pt; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .who .odoo { border-left-color: var(--amber); }
+
+  figure { margin: 0 0 3mm; break-inside: avoid; }
+  figure img { display: block; width: 100%; border: 1px solid var(--line); border-radius: 1.6mm; }
+  figure.narrow img { width: 72%; margin: 0 auto; }
+  figcaption { font-size: 7.8pt; color: var(--muted); margin-top: 1mm; line-height: 1.4; }
+
+  .note { font-size: 8.8pt; background: var(--paper); border-radius: 2mm; padding: 2.2mm 3mm; margin: 0 0 3mm; }
+  .note b { color: var(--red); }
+
+  .section { margin: 0 0 5mm; padding-bottom: 3mm; border-bottom: 1px solid var(--line); }
+  .section:last-child { border-bottom: 0; }
+  .where { display: block; width: fit-content; font-size: 7.6pt; font-weight: 600; color: var(--ink-soft); background: var(--paper);
+    border-radius: 99px; padding: .4mm 2.2mm; margin-bottom: 1.4mm; break-after: avoid; }
+  .section h3 { margin-bottom: 1.6mm; break-after: avoid; }
+  dl { margin: 0 0 2mm; }
+  dt { font-weight: 700; font-size: 8pt; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .05em; margin-top: 1.6mm; break-after: avoid; }
+  dd { margin: .4mm 0 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 0 0 3mm; }
+  td { text-align: left; padding: 1.8mm 0; border-bottom: 1px solid var(--line); vertical-align: top; display: block; }
+  .check td:first-child { font-weight: 700; color: var(--amber); border-bottom: 0; padding-bottom: 0; font-size: 8.4pt;
+    text-transform: uppercase; letter-spacing: .05em; }
+
+
+  /* v2: reglas, etapas, actividades, días del ejemplo */
+  .rules div { break-inside: avoid; border-left: 1mm solid var(--amber); padding: .6mm 0 .6mm 2.6mm; margin-bottom: 2.2mm; }
+  .rules b { display: block; }
+  .stage { break-inside: avoid; border: 1px solid var(--line); border-radius: 2mm; padding: 2.4mm 3mm; margin: 0 0 2.5mm; }
+  .stage h3 { font-size: 10.2pt; margin-bottom: 1.2mm; display: flex; align-items: center; gap: 2mm; }
+  .stage h3 .step-num { width: 5.6mm; height: 5.6mm; font-size: 7.6pt; }
+  .stage p { margin: 0 0 1mm; }
+  .stage p:last-child { margin: 0; }
+  .stage .auto { background: var(--amber-soft); border-radius: 1.4mm; padding: 1mm 2mm; }
+  .lbl { font-size: 7.2pt; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-right: 1mm; }
+  .act { break-inside: avoid; border-bottom: 1px solid var(--line); padding: 2mm 0; }
+  .act-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 2mm; }
+  .act-head b { font-size: 9.2pt; line-height: 1.3; }
+  .act small { display: block; color: var(--muted); font-size: 7.8pt; margin: .4mm 0 .6mm; }
+  .act p { margin: 0; }
+  .tag { flex: none; font-size: 6.8pt; font-weight: 700; border-radius: 99px; padding: .3mm 1.8mm; white-space: nowrap; margin-top: .3mm; }
+  .tag-si { background: #E3F1EA; color: var(--green); }
+  .tag-dep { background: var(--amber-soft); color: #8A5A0A; }
+  .tag-no { background: var(--paper); color: var(--muted); }
+  .grupo { font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--amber); margin: 3mm 0 0; break-after: avoid; }
+  .day { break-inside: avoid; display: grid; grid-template-columns: 13mm 1fr; gap: 0 2.4mm; margin: 0 0 3.2mm; }
+  .day > b { font-size: 7.8pt; color: var(--ink-soft); text-transform: uppercase; letter-spacing: .03em; line-height: 1.3; padding-top: .5mm; }
+  .day > div { border-left: 1px solid var(--line); padding-left: 2.4mm; }
+  .day p { margin: 0 0 1.2mm; }
+  .day p:last-child { margin: 0; }
+  table.opts { margin: 1.5mm 0 2mm; }
+  table.opts td, table.opts th { display: table-cell; padding: 1mm 1.2mm; font-size: 8.2pt; border-bottom: 1px solid var(--line); text-align: right; }
+  table.opts th { font-size: 7pt; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; }
+  table.opts td:first-child, table.opts th:first-child { text-align: left; }
+  table.opts tr.yo td { background: var(--amber-soft); font-weight: 700; }
+  .neg { color: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- ============ PORTADA ============ -->
+<section class="cover">
+  <div class="cover-band">
+    <div class="cover-mark">L</div>
+    <h1>Lumak en Odoo</h1>
+    <p class="cover-sub">Guía de uso: de encontrar un proceso en SECOP a cobrarlo, paso a paso.</p>
+    <p class="cover-meta">LUMAK SOLUTIONS S.A.S. · Versión 3 · 28 sep 2026 · Odoo 19 Community</p>
+  </div>
+  <div class="cover-body">
+    <h3>Todo es una sola cadena: cada paso abre el siguiente</h3>
+    <div class="chain">
+      <span>Buscar</span><i>→</i><span>Revisar</span><i>→</i><span>Preparar oferta</span><i>→</i><span>Presentar</span><i>→</i>
+      <span>Adjudicado</span><i>→</i><span>Contrato</span><i>→</i><span>Cobrar</span><i>→</i><span>Experiencia</span>
+    </div>
+    <h3>Qué hay en esta guía</h3>
+    <div class="toc">
+      <b>1</b><span>El menú de Lumak.</span>
+      <b>2</b><span>Un proceso, de principio a fin.</span>
+      <b>3</b><span>Las 5 actividades.</span>
+      <b>4</b><span>Si ganas: contrato y cobro.</span>
+      <b>5</b><span>Un ejemplo, día por día.</span>
+      <b>6</b><span>Lo automático y la rutina.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 1. MENÚ ============ -->
+<section class="break">
+  <h2>1. El menú de Lumak</h2>
+  <p>Todo lo de SECOP está en la app <strong>Lumak</strong>, que abre al entrar. El menú va en el orden en que trabajas:</p>
+  <table class="check">
+    <tr><td>Tablero</td><td>Cómo va todo: cierres de la semana, dinero en juego, lo que falta por cobrar, fechas legales y si lo automático corrió.</td></tr>
+    <tr><td>Todo lo publicado</td><td>Lo publicado que aún recibe ofertas. <strong>«Traer a mi flujo»</strong> lo pasa a tus procesos; <strong>«Importar con enlace»</strong>, si te pasaron un enlace.</td></tr>
+    <tr><td>Mis procesos</td><td>Tus licitaciones en tarjetas, por etapa. Aquí se trabaja la oferta.</td></tr>
+    <tr><td>Contratos</td><td>Lo que ganaste: un proyecto por contrato, con sus tareas y su pago.</td></tr>
+    <tr><td>Por cobrar</td><td>Las facturas que falta pagar.</td></tr>
+    <tr><td>Mercado</td><td>Estadísticas y competidores, con el histórico de SECOP.</td></tr>
+    <tr><td>Empresa</td><td>Kit de documentos, experiencia, fechas legales y datos de la empresa.</td></tr>
+  </table>
+  <figure><img src="m/01_inicio.png"><figcaption>El Tablero, con el menú arriba. «Todo lo publicado» y «Mis procesos» también están como botones.</figcaption></figure>
+</section>
+
+<!-- ============ 2. EL PROCESO ============ -->
+<section class="break">
+  <h2>2. Un proceso, de principio a fin</h2>
+
+  <h3 style="margin-bottom:2mm">Cómo llega un proceso</h3>
+  <table class="check">
+    <tr><td>Solo (lo normal)</td><td>Cada mañana a las 7:30 el monitor trae los procesos del nicho y los deja en <em>Mis procesos</em>, en «Por revisar», con el análisis de precio.</td></tr>
+    <tr><td>Lo encuentras tú</td><td><em>Todo lo publicado</em> → <strong>«Traer a mi flujo»</strong>.</td></tr>
+    <tr><td>Te pasan un enlace</td><td><em>Todo lo publicado</em> → <strong>«Importar con enlace»</strong>: pegas el enlace, el ID (CO1.REQ…) o la referencia.</td></tr>
+  </table>
+  <figure><img src="m/15_mercado.png"><figcaption>Todo lo publicado: arriba, «Importar con enlace»; en cada fila, «Traer a mi flujo».</figcaption></figure>
+
+  <h3 style="margin:4mm 0 2mm">Las 4 etapas</h3>
+  <p>Una tarjeta es un proceso. Se mueve arrastrándola, o con clic en la etapa en la barra de arriba de su ficha. Odoo hace cosas solo al entrar a las tres últimas.</p>
+
+  <div class="stage">
+    <h3><span class="step-num">1</span>Por revisar</h3>
+    <p><span class="lbl">Tú</span>Lees la invitación con el botón «Abrir en SECOP» y, en SECOP II, pulsas <strong>«Suscribirme»</strong>. Si tienes dudas, haces observaciones.</p>
+    <p><span class="lbl">Sigue</span>Si vas: <strong>«Preparando oferta»</strong>. Si no (limitado a MiPyME hasta el 26 sep 2027, acuerdo marco o no te conviene): <strong>«Perdido»</strong> con el motivo.</p>
+  </div>
+  <div class="stage">
+    <h3><span class="step-num">2</span>Preparando oferta</h3>
+    <p class="auto"><span class="lbl">Odoo solo</span>Crea la <strong>cotización</strong> al tope del presupuesto (es tu oferta económica) y las <strong>4 primeras actividades</strong>, con fechas contadas desde el cierre.</p>
+    <p><span class="lbl">Tú</span>Costo estimado, precio, kit al día, documentos firmados, presentar en SECOP II.</p>
+    <p><span class="lbl">Sigue</span>Cuando SECOP II dice «Presentada»: <strong>«Presentada»</strong>.</p>
+  </div>
+  <div class="stage">
+    <h3><span class="step-num">3</span>Presentada</h3>
+    <p class="auto"><span class="lbl">Odoo solo</span>Agenda la quinta actividad: revisar el informe y subsanar.</p>
+    <p><span class="lbl">Tú</span>Esperas el informe y subsanas si te lo piden (la oferta económica nunca se subsana).</p>
+    <p><span class="lbl">Sigue</span>Si ganas: botón <strong>«Ganado»</strong>. Si no: <strong>«Perdido»</strong> y anotas el precio ganador en la pestaña SECOP.</p>
+  </div>
+  <div class="stage">
+    <h3><span class="step-num">4</span>Adjudicado</h3>
+    <p class="auto"><span class="lbl">Odoo solo</span>Confirma la cotización y abre el <strong>contrato</strong> en <em>Contratos</em>, con sus tareas y su pago. Da igual si arrastras la tarjeta o pulsas «Ganado».</p>
+    <p><span class="lbl">Tú</span>Apruebas el contrato electrónico en SECOP II. Lo demás, en la sección 4.</p>
+  </div>
+  <p class="note"><b>Perdido</b> se marca en cualquier etapa, con el motivo. Odoo saca el proceso del tablero, borra sus actividades pendientes, cancela la cotización en borrador y quita el cierre del calendario.</p>
+  <figure><img src="m/03_procesos.png"><figcaption>Mis procesos: una columna por etapa y una tarjeta por proceso, con su cuenta regresiva.</figcaption></figure>
+
+  <h3 style="margin:4mm 0 2mm">La ficha del proceso</h3>
+  <p>Arriba dice siempre <strong>el siguiente paso</strong>. La pestaña <strong>SECOP</strong> tiene el resto: número, fechas, presupuesto, costo, precio mínimo y el análisis de precio para ganar.</p>
+  <figure><img src="m/04_proceso.png"><figcaption>Un proceso en «Preparando oferta»: la barra de etapas, los botones «Ganado», «Perdido» y «Preparar documentos de la oferta», y el siguiente paso.</figcaption></figure>
+</section>
+
+<!-- ============ 3. ACTIVIDADES ============ -->
+<section class="break">
+  <h2>3. Las 5 actividades</h2>
+  <p>Una actividad es un <strong>recordatorio con fecha</strong>. Las 5 son obligatorias para ofertar bien. Aparecen en la ficha del proceso y en el reloj de la barra de arriba: verde a tiempo, naranja hoy, rojo vencida.</p>
+  <table class="check">
+    <tr><td>La cumpliste</td><td><strong>«Marcar como hecho»</strong>.</td></tr>
+    <tr><td>La fecha no sirve</td><td><strong>«Editar»</strong> y la mueves. Se cuentan días calendario, así que a veces caen en fin de semana.</td></tr>
+  </table>
+  <figure><img src="m/16_actividades.png"><figcaption>Las 4 actividades de «Preparando oferta», en la ficha del proceso.</figcaption></figure>
+
+  <p class="grupo">Al entrar a «Preparando oferta»</p>
+  <div class="act"><div class="act-head"><b>1. Kit al día y lo que pida la invitación</b></div>
+    <small>2 días antes del cierre</small><p>Cámara de 30 días o menos, antecedentes y REDAM vigentes al cierre (<em>Empresa → Kit</em>). Si la invitación pide experiencia, formatos propios o garantía, los preparas.</p></div>
+  <div class="act"><div class="act-head"><b>2. Precio final en la cotización</b></div>
+    <small>1 día antes del cierre</small><p>Pones el costo estimado en la pestaña SECOP y miras el precio sugerido. La cotización va entre el precio mínimo y el presupuesto, y la lista de precios de SECOP II debe ser igual.</p></div>
+  <div class="act"><div class="act-head"><b>3. Documentos de la oferta firmados</b></div>
+    <small>1 día antes del cierre</small><p>Botón «Preparar documentos de la oferta»: bajas el ZIP y firmas la carta y las declaraciones.</p></div>
+  <div class="act"><div class="act-head"><b>4. Presentar en SECOP II y verificar «Presentada»</b></div>
+    <small>El día del cierre, antes de la hora</small><p>Antes miras si hubo adendas. Presentas con el usuario del representante legal: el cronómetro cierra a la hora exacta.</p></div>
+  <p class="grupo">Al entrar a «Presentada»</p>
+  <div class="act"><div class="act-head"><b>5. Revisar el informe y subsanar si lo piden</b></div>
+    <small>2 días después del cierre</small><p>Si la entidad pide aclarar o completar un documento, respondes por «Mensajes» dentro del plazo. Si se vence, quedas fuera.</p></div>
+</section>
+
+<!-- ============ 4. SI GANAS ============ -->
+<section class="break">
+  <h2>4. Si ganas: contrato y cobro</h2>
+  <p>Al pasar a «Adjudicado», la cotización se vuelve <strong>orden de venta</strong> y nace el <strong>contrato</strong> en <em>Contratos</em>. Desde el proceso llegas con el botón «Proyecto del Contrato». Desde el contrato vuelves con «Proceso SECOP».</p>
+
+  <h3 style="margin:3mm 0 1mm">Las tareas del contrato</h3>
+  <p>El contrato trae 13 tareas en 4 columnas: legalización, ejecución, facturación y cierre. Son una lista para no olvidar nada: cuando termines una, márcala «Hecha»; si no aplica, «Cancelada». Las indispensables:</p>
+  <ul>
+    <li>Aprobar el contrato electrónico en SECOP II.</li>
+    <li>Póliza, solo si la invitación la exige.</li>
+    <li>Registro presupuestal antes de empezar a trabajar.</li>
+    <li>Registro de la Ley 2013 (bienes y rentas), desde el primer contrato estatal.</li>
+    <li>Informe al supervisor en cada pago.</li>
+    <li>Pedir la certificación de experiencia al terminar.</li>
+  </ul>
+  <figure><img src="m/17_tareas.png"><figcaption>Las tareas del contrato, por columna.</figcaption></figure>
+
+  <h3 style="margin:4mm 0 1mm" class="break">Cómo cobrar, en 3 pasos</h3>
+  <p>En Odoo el pago se llama <strong>«Objetivo»</strong>. Cuando el supervisor recibe a satisfacción:</p>
+  <figure class="narrow"><img src="m/22_tarjeta.png"><figcaption><strong>1.</strong> En <em>Contratos</em>, la tarjeta muestra una bandera con los objetivos cumplidos: 0/1 antes de entregar. Clic en ella.</figcaption></figure>
+  <figure><img src="m/23_objetivo.png"><figcaption><strong>2.</strong> Marca la casilla «Alcanzado» y pulsa «Ver orden de venta».</figcaption></figure>
+  <figure><img src="m/24_crear_factura.png"><figcaption><strong>3.</strong> En la orden, «Crear factura». La factura sale por el valor del objetivo.</figcaption></figure>
+  <p>Luego emites la factura legal en la DIAN (gratis), pegas su CUFE en la factura de Odoo, la radicas en la entidad y la cargas en SECOP II. Queda en <em>Por cobrar</em> hasta que registras el pago. Llega menos que el total: la entidad retiene el 15 % del IVA y las estampillas, y la factura muestra el neto esperado.</p>
+  <p class="note">Si el contrato paga en <strong>varias cuotas</strong>: en los objetivos del contrato crea uno por cuota y ponle su parte en «Cantidad (%)», por ejemplo 50 % y 50 %.</p>
+  <p>Al terminar: acta de liquidación si la piden, el derecho de petición para la certificación (<em>Contrato → ⚙ → Imprimir</em>) y el botón <strong>«Registrar experiencia»</strong>. Desde la siguiente oferta, ese contrato entra solo en tu formato de experiencia.</p>
+</section>
+
+<!-- ============ 5. EJEMPLO ============ -->
+<section class="break">
+  <h2>5. Un ejemplo, día por día</h2>
+  <div class="case">
+    <p><strong>El caso.</strong> La Alcaldía de Chía publica una <strong>mínima cuantía</strong> para una mesa de ayuda TIC: presupuesto de $23,8 M con IVA, cierre el <strong>viernes 9 de octubre a las 10:00 a. m.</strong> y estampillas del 4,1 %. Ejecutarlo te cuesta $14 M. El análisis de precio es real: sale de 188 procesos del nicho de los últimos 3 años.</p>
+    <div class="nums">
+      <div><small>Presupuesto</small><b>$23,8 M</b></div>
+      <div><small>Precio mínimo sin IVA</small><b>$15,6 M</b></div>
+      <div><small>Tu oferta (con IVA)</small><b>$20,2 M</b></div>
+      <div><small>Neto que llega al banco</small><b>$19,0 M</b></div>
+    </div>
+  </div>
+
+  <div class="day"><b>Lun 5 oct<br>7:30 a. m.</b><div>
+    <p><strong>Odoo:</strong> el monitor lo trae a «Por revisar», con el cierre en el calendario.</p>
+    <p><strong>Tú:</strong> lees la invitación: no está limitada a MiPyME, no pide experiencia ni póliza. Te suscribes en SECOP II y lo pasas a <strong>«Preparando oferta»</strong>.</p>
+    <p><strong>Odoo:</strong> crea la cotización por $23,8 M y las 4 actividades: la 1 vence el miércoles 7, la 2 y la 3 el jueves 8, la 4 el viernes 9.</p>
+    <p><strong>Tú:</strong> pones costo $14 M y estampillas 4,1 % en la pestaña SECOP. Odoo calcula el precio mínimo: $15,6 M sin IVA.</p>
+  </div></div>
+  <figure><img src="m/05_pestana_secop.png"><figcaption>La pestaña SECOP: con costo de $14 M y estampillas de 4,1 %, el precio mínimo sin IVA es $15,6 M.</figcaption></figure>
+
+  <div class="day"><b>Mar 6 oct<br>7:30 a. m.</b><div>
+    <p><strong>Odoo:</strong> con tu costo, el monitor calcula el <strong>precio sugerido</strong>. «Utilidad» es lo que te queda si ganas, después de IVA, SIMPLE, estampillas y costo:</p>
+    <table class="opts">
+      <tr><th>Ofertar</th><th>Prob.</th><th>Utilidad</th></tr>
+      <tr><td>$22,0 M (sugerido)</td><td>36 %</td><td>$2,6 M</td></tr>
+      <tr class="yo"><td>$20,2 M (tu oferta)</td><td>45 %</td><td>$1,3 M</td></tr>
+      <tr><td>$19,3 M</td><td>50 %</td><td>$0,6 M</td></tr>
+      <tr><td>$14,5 M</td><td>70 %</td><td class="neg">−$3,0 M</td></tr>
+    </table>
+    <p>También avisa que en esa alcaldía el ganador suele ofertar mucho más barato (mediana: 50 % bajo el presupuesto) y que CREAR IMAGEN IT le ganó 4 de 4.</p>
+    <figure><img src="m/19_analisis.png"><figcaption>Así se ve en la pestaña SECOP. La captura es de otro proceso: presupuesto de $45 M y costo de $25 M.</figcaption></figure>
+    <p><strong>Tú:</strong> eliges <strong>$20,2 M</strong> ($17 M + IVA): ganas menos que con el sugerido, pero tienes más probabilidad, y el primer contrato vale también por la experiencia. Lo pones en la cotización.</p>
+  </div></div>
+
+  <div class="day"><b>Mié 7 oct</b><div>
+    <p><strong>1:</strong> la Cámara tiene más de 30 días: sacas una nueva y la subes al Kit. Hecha.</p>
+  </div></div>
+
+  <div class="day"><b>Jue 8 oct</b><div>
+    <p><strong>2:</strong> el precio ya está: hecha. <strong>3:</strong> «Preparar documentos de la oferta», bajas el ZIP y firmas: hecha.</p>
+    <p><strong>4:</strong> presentas un día antes, por seguridad: lista de precios igual a la cotización, adjuntas y presentas. SECOP II dice «Presentada»: hecha. Pasas el proceso a <strong>«Presentada»</strong>.</p>
+    <p><strong>Odoo:</strong> agenda la 5 para el domingo 11. La mueves al lunes con «Editar».</p>
+  </div></div>
+  <figure class="narrow"><img src="m/06_paquete.png"><figcaption>El paquete queda como un mensaje del proceso: «Descargar archivos» baja todo en un ZIP numerado.</figcaption></figure>
+
+  <div class="day"><b>Mié 14 oct</b><div>
+    <p>El informe te pide un RUT actualizado. Lo subes por «Mensajes» ese mismo día: la 5, hecha.</p>
+  </div></div>
+
+  <div class="day"><b>Lun 19 oct</b><div>
+    <p>La entidad acepta tu oferta. Apruebas el contrato electrónico en SECOP II y pulsas <strong>«Ganado»</strong>.</p>
+    <p><strong>Odoo:</strong> confirma la cotización y crea el contrato con sus tareas. No piden póliza: cancelas esa tarea. Haces el registro de la Ley 2013 y esperas el registro presupuestal antes de empezar.</p>
+  </div></div>
+
+  <div class="day"><b>Nov</b><div>
+    <p>Entregas. Imprimes el informe de actividades y la certificación de aportes, marcas el objetivo «Alcanzado» y creas la factura (sección 4). La emites en la DIAN, la radicas y la cargas en SECOP II.</p>
+    <p>Llegan <strong>$19,05 M</strong>: los $20,23 M menos el IVA que retiene la entidad y las estampillas. Registras el pago.</p>
+  </div></div>
+  <figure><img src="m/10_factura.png"><figcaption>La factura: $20,23 M de total, pero al banco deben llegar $19,05 M.</figcaption></figure>
+
+  <div class="day"><b>Al terminar</b><div>
+    <p>Pides la certificación y pulsas «Registrar experiencia». Desde la siguiente oferta cuenta como tuya.</p>
+  </div></div>
+</section>
+
+<!-- ============ 6. AUTOMÁTICO Y RUTINA ============ -->
+<section class="break">
+  <h2>6. Lo automático y la rutina</h2>
+  <p>Estas tareas corren solas en este computador. No usan inteligencia artificial: son fórmulas sobre el histórico de SECOP. El Tablero muestra, en <strong>«Automático»</strong>, cuándo corrió cada una: punto verde si va al día, ámbar si se atrasó. Lo atrasado corre solo al prender el equipo.</p>
+  <table class="check">
+    <tr><td>Monitor de SECOP · 7:30 a. m.</td><td>Trae los procesos nuevos del nicho a «Por revisar», calcula el precio para ganar de tus procesos abiertos y actualiza Todo lo publicado.</td></tr>
+    <tr><td>Base histórica · lunes 6:00 a. m.</td><td>Actualiza el histórico de procesos, ofertas y ganadores, del que salen Mercado y el precio sugerido.</td></tr>
+    <tr><td>Respaldo · 7:00 p. m.</td><td>Copia la base y los archivos en el computador. Una vez al mes, pasa uno a un disco externo.</td></tr>
+  </table>
+  <figure class="narrow"><img src="m/25_automatico.png"><figcaption>«Automático», en el Tablero.</figcaption></figure>
+
+  <div class="section">
+    <span class="where">Mercado</span>
+    <h3>Estadísticas y competidores</h3>
+    <dl>
+      <dt>Estadísticas</dt><dd>Cada año: cuántos procesos del nicho tuvieron ganador, cuántas ofertas recibieron y cuánto bajó el ganador frente al presupuesto. Puedes cambiar las filas a entidad o departamento.</dd>
+      <dt>Competidores</dt><dd>Quién oferta en el nicho, cuántas gana, su tasa de éxito y su descuento. Clic en una cifra para ver sus ofertas.</dd>
+    </dl>
+    <figure class="narrow"><img src="m/20_estadisticas.png"></figure>
+    <figure><img src="m/21_competidores.png"></figure>
+  </div>
+
+  <div class="section">
+    <span class="where">Empresa</span>
+    <h3>Kit, experiencia, fechas y datos</h3>
+    <dl>
+      <dt>Kit de la empresa</dt><dd>Los certificados de cada oferta, con su vigencia. Si algo dice <em>Falta</em> o <em>Vencido</em>: «Sacarlo», bajas el PDF y lo subes con su fecha. La Cámara solo sirve 30 días.</dd>
+      <dt>Experiencia</dt><dd>Los contratos que prueban experiencia. «En ofertas» decide cuáles van en el formato. Si falta una certificación, imprime la «Solicitud de certificación».</dd>
+      <dt>Fechas de la empresa</dt><dd>Anticipos del SIMPLE, IVA, renovación de la matrícula, RUP. Llega un recordatorio un día antes.</dd>
+      <dt>Datos de la empresa</dt><dd>Lo que usan todos los documentos: representante legal, dirección, correo. Si cambia algo, cámbialo aquí y en la Cámara.</dd>
+    </dl>
+    <figure><img src="m/11_kit.png"><figcaption>El kit de la empresa.</figcaption></figure>
+  </div>
+
+  <h3 style="margin:0 0 2mm" class="break">La rutina</h3>
+  <table class="check">
+    <tr><td>Cada mañana</td><td>Tablero: lo rojo primero (cierres de hoy o mañana, fechas legales, facturas vencidas). Revisar lo que llegó a «Por revisar».</td></tr>
+    <tr><td>Dos veces por semana</td><td><em>Todo lo publicado</em> con el filtro «Fuera de mi flujo»: lo que no es del nicho pero te puede servir.</td></tr>
+    <tr><td>Cada pago</td><td>Informe, aportes, factura en la DIAN con su CUFE en Odoo, radicar en la entidad y en SECOP II, confirmar el neto.</td></tr>
+    <tr><td>Fin de mes</td><td>Fechas del mes siguiente, renovar en el kit lo que vence y copiar un respaldo al disco externo.</td></tr>
+  </table>
+
+  <h3 style="margin:4mm 0 2mm">Usuarios</h3>
+  <p><strong>carlos</strong> administra todo; <strong>dayana</strong> ve procesos, cotizaciones y contratos, sin ajustes ni contabilidad. Se manejan en <em>Ajustes → Usuarios y empresas → Usuarios</em>.</p>
+
+  <h3 style="margin:4mm 0 2mm">Para saber más</h3>
+  <ul>
+    <li><strong>docs/salida-a-produccion.md</strong>: contraseñas, respaldos y lo pendiente.</li>
+    <li><strong>docs/plan-operacion-lumak.md</strong>: el plan de la empresa (impuestos, nómina, crecimiento).</li>
+    <li>Las capturas son de datos de práctica o de procesos reales de SECOP.</li>
+  </ul>
+</section>
+
+</body>
+</html>

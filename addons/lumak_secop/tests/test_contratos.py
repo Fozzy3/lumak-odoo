@@ -46,6 +46,13 @@ class TestContratos(TransactionCase):
         lead.stage_id = self.preparando
         self.assertEqual(len(lead.order_ids), 1)
 
+    def test_losing_cleans_pending_activities_and_the_draft_quotation(self):
+        lead = self._lead(stage_id=self.preparando.id)
+        self.assertTrue(lead.activity_ids and lead.order_ids)
+        lead.action_set_lost(lost_reason_id=self.env.ref("lumak_secop.lost_no_ofertamos").id)
+        self.assertFalse(lead.activity_ids, "nada pendiente de un proceso perdido")
+        self.assertEqual(lead.order_ids.mapped("state"), ["cancel"])
+
     def test_without_entity_it_asks_for_it(self):
         lead = self._lead(partner_id=False)
         lead.stage_id = self.preparando

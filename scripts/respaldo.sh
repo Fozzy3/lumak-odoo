@@ -26,3 +26,9 @@ done
 
 echo "Respaldo listo en $destino:"
 du -h "$destino/lumak-$fecha.dump" "$destino/filestore-$fecha.tar.gz"
+
+# Deja en el tablero de Odoo que el respaldo corrió (si Odoo no responde, el respaldo igual quedó)
+tamano=$(du -ch "$destino/lumak-$fecha.dump" "$destino/filestore-$fecha.tar.gz" | tail -1 | cut -f1)
+tamano="${tamano/K/ KB}"; tamano="${tamano/M/ MB}"; tamano="${tamano/G/ GB}"
+(cd estadistica && "$HOME/.local/bin/uv" run --quiet python -m secop_estadistica avisar respaldo "$tamano") \
+  || echo "No pude avisar a Odoo; el respaldo sí quedó."

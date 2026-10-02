@@ -77,11 +77,11 @@ Ojo con el SIMPLE: la tarifa de Lumak es **5,9 %** hasta 6.000 UVT de ingresos a
 
 | Paso | Dónde | Qué hace Odoo solo | Qué haces tú |
 |---|---|---|---|
-| 1. Detectar | **Automático cada mañana** (7:30): el monitor trae los procesos abiertos del nicho. A mano: botón «Importar desde SECOP» del tablero | Crea el proceso con la entidad (NIT y DV), el presupuesto, la modalidad, la fecha de cierre y el plazo | Pegar el enlace, el ID o la referencia |
-| 2. Evaluar | Tarjeta del proceso | Cuenta regresiva de colores. El cierre y el límite de observaciones quedan en el **Calendario**, con recordatorio | Leer la invitación, decidir y hacer observaciones |
-| 3. Preparar la oferta | Pasar a «Preparando oferta» | **Crea la cotización** (la oferta económica) al tope del presupuesto. Agenda 8 pasos contados desde el cierre | Poner el costo estimado. Bajar el precio en la cotización |
+| 1. Detectar | **Automático cada mañana** (7:30): el monitor trae los procesos abiertos del nicho a «Por revisar». A mano: *Todo lo publicado* → «Traer a mi flujo», o «Importar con enlace» | Crea el proceso con la entidad (NIT y DV), el presupuesto, la modalidad, la fecha de cierre y el plazo | Pegar el enlace, el ID o la referencia |
+| 2. Revisar | «Por revisar» | Cuenta regresiva de colores. El cierre y el límite de observaciones quedan en el **Calendario**, con recordatorio. El botón **«Preguntar a la IA»** copia una pregunta con el perfil de la empresa, la experiencia y el proceso, para pegarla en cualquier IA | Leer la invitación, decidir y hacer observaciones. El perfil se ajusta en *Empresa → Datos de la empresa*, pestaña «Ofertas SECOP» |
+| 3. Preparar la oferta | Pasar a «Preparando oferta» | **Crea la cotización** (la oferta económica) al tope del presupuesto. Agenda 4 actividades obligatorias contadas desde el cierre | Poner el costo estimado. Bajar el precio en la cotización |
 | 4. Documentos | Botón **«Preparar documentos de la oferta»** | Genera carta de presentación, oferta económica, certificación de aportes (art. 50), compromiso anticorrupción, declaración de inhabilidades y formato de experiencia. Les suma los certificados del kit vigentes al cierre. Todo queda en un mensaje: **«Descargar archivos» baja un ZIP**. Avisa lo que falta o vence, si la oferta supera el presupuesto o si el precio no cubre el costo | Firmar (sección 5.3) y subir a SECOP II |
-| 5. Cierre y evaluación | «Oferta presentada», «En evaluación» | Agenda el plan «Después del cierre» | Subsanar a tiempo; anotar el n.º de oferentes y el precio ganador |
+| 5. Cierre y evaluación | «Presentada» | Agenda revisar el informe y subsanar | Subsanar a tiempo; anotar el n.º de oferentes y el precio ganador |
 | 6. Adjudicado | Pasar a «Adjudicado» | **Confirma la cotización y abre el proyecto del contrato** desde la plantilla, con sus tareas y su hito de pago | Aprobar el contrato en SECOP II **con tu usuario de representante legal** |
 
 **Precio mínimo.** En la pestaña SECOP pones el costo estimado y Odoo calcula el precio mínimo sin IVA:
@@ -130,7 +130,7 @@ Todo sale del histórico de SECOP (`estadistica/README.md`). Con el costo estima
 ### 3.4 Cierre y experiencia
 
 1. Acta de liquidación. Luego *Imprimir → «Derecho de petición (certificación de experiencia)»*. La entidad responde en 10 días hábiles (Ley 1755).
-2. Botón **«Registrar experiencia»** en el proyecto: deja el contrato listo en *Lumak → Experiencia*. Cuando llegue la certificación, se adjunta allí.
+2. Botón **«Registrar experiencia»** en el proyecto: deja el contrato listo en *Lumak → Empresa → Experiencia*. Cuando llegue la certificación, se adjunta allí.
 3. Los 5 contratos de mayor valor van solos en el **Formato de experiencia** de cada oferta.
 4. Tu experiencia personal (UD y Agencia Catastral) se registra igual, marcada «Experiencia del socio»: vale para la empresa sus tres primeros años, vía RUP.
 
@@ -158,7 +158,7 @@ Todo sale del histórico de SECOP (`estadistica/README.md`). Con el costo estima
 
 ## 5. Documentos
 
-### 5.1 Kit de la empresa (*Lumak → Kit de la empresa*)
+### 5.1 Kit de la empresa (*Lumak → Empresa → Kit de la empresa*)
 
 Son 14 documentos. Cada uno tiene su emisor, su enlace gratuito (botón «Sacarlo») y su vigencia. Subes el PDF con la fecha de expedición, y Odoo:
 - muestra si está vigente, vence pronto, está vencido o falta;
@@ -241,7 +241,7 @@ Textos adaptados de los formatos oficiales del Documento Tipo de mínima cuantí
 
 ## 7. Finanzas y obligaciones
 
-- **Calendario legal en Odoo** (*Lumak → Fechas de la empresa*): 22 fechas, también en el Calendario y en el tablero, con recordatorio un día antes. Las más cercanas:
+- **Calendario legal en Odoo** (*Lumak → Empresa → Fechas de la empresa*): 22 fechas, también en el Calendario y en el tablero, con recordatorio un día antes. Las más cercanas:
 
 | Fecha | Qué |
 |---|---|
@@ -333,7 +333,7 @@ Se puede borrar cuando quieras, junto con los demás registros SIM.
 
 **Tuyos (sin código):**
 1. **Kit:** renovar los cuatro antecedentes del representante legal. Sacar los de la empresa (Procuraduría y Contraloría con el NIT; si la Procuraduría no encuentra el NIT, hay que registrarlo en persona), el REDAM y, cuando abras la cuenta, la certificación bancaria. Cada documento tiene su botón «Sacarlo».
-2. **Experiencia** (*Lumak → Experiencia*). Hay 6 contratos tuyos cargados con sus soportes. Van en las ofertas los dos que tienen soporte limpio:
+2. **Experiencia** (*Lumak → Empresa → Experiencia*). Hay 6 contratos tuyos cargados con sus soportes. Van en las ofertas los dos que tienen soporte limpio:
    - IGAC 31581 de 2024: $28.285.000 ejecutados. La certificación dice $28.785.000 pactados; confirma cuál pide cada pliego.
    - Agencia Catastral CD-ACC-CPS-169-2023: $17.125.667, con acta de liquidación.
 
@@ -341,7 +341,7 @@ Se puede borrar cuando quieras, junto con los demás registros SIM.
    - Agencia Catastral CD-ACC-CPS-057-2023: la certificación trae **una cédula que no es la tuya**. Pedir la corrección a la ACC.
    - IGAC 33317 de 2025: solo hay contrato, sin certificación ni fecha de inicio. Pedir la certificación.
 
-   Las dos cartas (derecho de petición) ya están en `privado/`, que queda fuera de git porque llevan tus datos. Se vuelven a imprimir desde *Lumak → Experiencia → el contrato → Imprimir → «Solicitud de certificación»*. Cuando llegue cada certificación, se adjunta al registro y se activa «En ofertas».
+   Las dos cartas (derecho de petición) ya están en `privado/`, que queda fuera de git porque llevan tus datos. Se vuelven a imprimir desde *Lumak → Empresa → Experiencia → el contrato → Imprimir → «Solicitud de certificación»*. Cuando llegue cada certificación, se adjunta al registro y se activa «En ofertas».
    - JorjWeb y AFT Solutions: son de empresas privadas, sin valor total ni objeto. Para contar en SECOP necesitan una certificación con esos datos (y de facturación, firmada por contador).
    - UD CPS 2721-2026 y Corprogreso (PNUD-IGAC): siguen en ejecución, así que todavía no cuentan.
 3. Hacer una oferta de práctica de punta a punta con un proceso real de mínima cuantía.
@@ -369,7 +369,7 @@ Investigación completa, con fuentes, en `investigacion/empresa-bien-constituida
 - **Respaldos** de Odoo: `scripts/respaldo.sh` guarda la base y los adjuntos en `~/Respaldos/lumak`; la restauración está probada.
   - Los libros se conservan **10 años** (Código de Comercio, art. 60), así que una vez al mes hay que copiar un respaldo a un disco externo.
   - Los XML y PDF de la factura electrónica se adjuntan en Odoo: la solución gratuita de la DIAN no garantiza guardarlos.
-- **Política de tratamiento de datos personales**: Odoo la genera desde *Lumak → Datos de la empresa → ⚙ → Imprimir*, y el kit tiene su espacio.
+- **Política de tratamiento de datos personales**: Odoo la genera desde *Lumak → Empresa → Datos de la empresa → ⚙ → Imprimir*, y el kit tiene su espacio.
 
 **Ahora (antes del 26 oct 2026):**
 1. **Cesión de tus derechos de autor a Lumak**, con un acta del accionista único que la autorice (Ley 222, art. 23 num. 7). No tienes contrato con Lumak, así que el código que escribes es tuyo; sin cesión, Lumak no puede licenciarlo ni venderlo. Después, registrar el software en la Dirección Nacional de Derecho de Autor (gratis). Queda en el calendario el 5 oct.

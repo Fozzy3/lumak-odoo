@@ -21,5 +21,5 @@
         <field name="domain">[('secop_tipo', '=', 'obligacion')]</field>
         <field name="context">{'default_secop_tipo': 'obligacion', 'default_allday': True}</field>
     </record>
-    <menuitem id="menu_lumak_fechas" name="Fechas de la empresa" parent="menu_lumak_root" action="action_lumak_fechas" sequence="4"/>
+    <menuitem id="menu_lumak_fechas" name="Fechas de la empresa" parent="menu_lumak_empresa_grupo" action="action_lumak_fechas" sequence="3"/>
 </odoo>
